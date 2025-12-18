@@ -17,17 +17,37 @@ export async function POST(request: NextRequest) {
     const knowledgeBaseRef = collection(db, 'knowledge_base');
     const snapshot = await getDocs(knowledgeBaseRef);
 
-    // Create a simple text prompt instead of multimodal
-    const systemPrompt = `אתה עוזר חינוכי מועיל. תמיד ענה בעברית בלבד. ספק מידע ברור ומדויק.`;
-    let prompt = systemPrompt + '\n\n';
+    // Build a single concatenated prompt (fail-safe) with the Hebrew rules
+    const hebrewRules = `אתה עוזר מומחה המענה על שאלות בהתבסס אך ורק על המסמכים PDF המסופקים.
 
+ענה תמיד רק בעברית, ללא קשר לשפה שבה שאל המשתמש.
+
+המסמכים ההקשר המסופקים הם בעברית. נתח אותם לעומק.
+
+כל פעם שאתה מציין עובדה, אתה חייב לציין את המקור: סעיף, עמוד, או פסקה מההקשר (למשל, '[מקור: סעיף 4.2]').
+
+עצב את התשובה בצורה ברורה באמצעות Markdown:
+- השתמש **מודגש** למונחים מרכזיים.
+- השתמש ברשימות נקודות לרשימות.
+- השתמש ### כותרות להפרדת נושאים.
+
+אם התשובה לא נמצאת במסמכים, השב בדיוק: "לא מצאתי את המידע הזה במסמכים שהעלית. האם תרצה שאחפש נושא אחר?"`;
+
+    // Header + context + user question all concatenated into one string
+    let finalPrompt = 'System Instructions: ' + hebrewRules + '\n\n';
+
+    finalPrompt += 'Context from files:\n';
     if (!snapshot.empty) {
-      prompt += 'Based on the following documents, please answer the user\'s question:\n';
-      // For now, just mention that documents are available
-      prompt += `There are ${snapshot.docs.length} documents available for reference.\n\n`;
+      snapshot.docs.forEach((doc, index) => {
+        const data = doc.data();
+        const content = data.content || data.text || JSON.stringify(data);
+        finalPrompt += `Document ${index + 1}:\n${content}\n\n`;
+      });
+    } else {
+      finalPrompt += 'No documents available.\n\n';
     }
 
-    prompt += 'User question: ' + message;
+    finalPrompt += 'User Question: ' + message;
 
     // Construct Gemini payload with simple text
     const model = genAI.getGenerativeModel({
@@ -40,7 +60,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(finalPrompt);
+
+    console.log('Raw Gemini Response:', JSON.stringify(result, null, 2));
 
     const response = result.response;
     const text = response.text();
