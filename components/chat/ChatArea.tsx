@@ -1,0 +1,155 @@
+import { useState, useRef, useEffect } from 'react';
+import { FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+interface Message {
+  role: 'user' | 'bot';
+  content: string;
+}
+
+export default function ChatArea() {
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'bot', content: 'Hello! How can I help you today?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+      const botMessage: Message = { role: 'bot', content: data.response };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage: Message = { role: 'bot', content: 'Sorry, I encountered an error. Please try again.' };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-brand-dark">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex items-start space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            {message.role === 'bot' && (
+              <div className="flex-shrink-0 w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center">
+                <FiMessageSquare className="w-4 h-4 text-brand-dark" />
+              </div>
+            )}
+            <div
+              className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl shadow-lg ${
+                message.role === 'user'
+                  ? 'bg-brand-accent text-white rounded-br-md'
+                  : 'bg-brand-slate text-brand-cream rounded-bl-md border border-brand-accent/20'
+              }`}
+              dir="auto"
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-brand-cream">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-md font-bold mb-2 text-brand-cream">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-sm font-bold mb-2 text-brand-cream">{children}</h3>,
+                  ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                  em: ({ children }) => <em className="italic">{children}</em>,
+                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
+            </div>
+            {message.role === 'user' && (
+              <div className="flex-shrink-0 w-8 h-8 bg-brand-slate rounded-full flex items-center justify-center">
+                <FiUser className="w-4 h-4 text-brand-cream" />
+              </div>
+            )}
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex items-start space-x-3 justify-start">
+            <div className="flex-shrink-0 w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center">
+              <FiMessageSquare className="w-4 h-4 text-brand-dark" />
+            </div>
+            <div className="max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl shadow-lg bg-brand-slate text-brand-cream rounded-bl-md border border-brand-accent/20">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce [animation-delay:0.1s]"></div>
+                <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="p-6 border-t border-brand-slate/20 bg-brand-slate shadow-lg">
+        <div className="flex gap-3 max-w-4xl mx-auto">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message..."
+              disabled={isLoading}
+              className="w-full px-4 py-3 pr-12 bg-brand-slate border border-brand-accent rounded-full text-brand-cream placeholder-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
+            />
+          </div>
+          <button
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            className="px-6 py-3 bg-gradient-to-r from-brand-accent to-blue-600 hover:from-blue-600 hover:to-brand-accent text-white rounded-full transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <FiSend className="w-4 h-4" />
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
