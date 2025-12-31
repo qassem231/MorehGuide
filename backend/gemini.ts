@@ -94,6 +94,14 @@ Which single document ID is most relevant to answer this question? Return ONLY t
     return selectedDocId;
   } catch (error) {
     console.error('❌ [ROUTER]: Error selecting relevant document:', error);
+    
+    // Check for rate limiting errors
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+    if (errorMessage.includes('fetch failed') || errorMessage.includes('429') || errorMessage.includes('quota')) {
+      console.warn('⚠️ [ROUTER]: Rate limit detected during document selection, returning NONE');
+      return 'NONE';
+    }
+    
     throw new Error('Failed to select relevant document');
   }
 }
@@ -113,6 +121,14 @@ User Question: ${message}`;
     return result.response.text();
   } catch (error) {
     console.error('❌ [GENERAL]: Error generating general response:', error);
+    
+    // Check for rate limiting errors
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+    if (errorMessage.includes('fetch failed') || errorMessage.includes('429') || errorMessage.includes('quota')) {
+      console.warn('⚠️ [GENERAL]: Rate limit detected, returning friendly message');
+      return '⚠️ המערכת עמוסה כרגע עקב מגבלת שימוש. אנא נסה שוב בעוד מספר דקות.';
+    }
+    
     throw new Error('Failed to generate general response');
   }
 }
@@ -231,6 +247,14 @@ User Question: ${message}`;
     return result.response.text();
   } catch (error) {
     console.error('❌ [GENERATION]: Error generating contextual response:', error);
+    
+    // Check for rate limiting errors
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+    if (errorMessage.includes('fetch failed') || errorMessage.includes('429') || errorMessage.includes('quota')) {
+      console.warn('⚠️ [GENERATION]: Rate limit detected, returning friendly message');
+      return '⚠️ המערכת עמוסה כרגע עקב מגבלת שימוש. אנא נסה שוב בעוד מספר דקות.';
+    }
+    
     throw new Error('Failed to generate response with document context');
   }
 }
