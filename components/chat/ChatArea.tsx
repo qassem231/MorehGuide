@@ -76,15 +76,15 @@ export default function ChatArea() {
             className={`flex items-start space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {message.role === 'bot' && (
-              <div className="flex-shrink-0 w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center">
-                <FiMessageSquare className="w-4 h-4 text-brand-dark" />
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md">
+                <FiMessageSquare className="w-4 h-4 text-white" />
               </div>
             )}
             <div
               className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl shadow-lg ${
                 message.role === 'user'
-                  ? 'bg-brand-accent text-white rounded-br-md'
-                  : 'bg-brand-slate text-brand-cream rounded-bl-md border border-brand-accent/20'
+                  ? 'bg-gradient-brand text-white rounded-br-md shadow-brand'
+                  : 'bg-brand-slate/70 text-brand-cream rounded-bl-md border border-brand-slate/50 backdrop-blur-sm'
               }`}
               dir="auto"
             >
@@ -105,18 +105,18 @@ export default function ChatArea() {
               </ReactMarkdown>
             </div>
             {message.role === 'user' && (
-              <div className="flex-shrink-0 w-8 h-8 bg-brand-slate rounded-full flex items-center justify-center">
-                <FiUser className="w-4 h-4 text-brand-cream" />
+              <div className="flex-shrink-0 w-8 h-8 bg-brand-slate rounded-full flex items-center justify-center shadow-md">
+                <FiUser className="w-4 h-4 text-brand-accent" />
               </div>
             )}
           </div>
         ))}
         {isLoading && (
           <div className="flex items-start space-x-3 justify-start">
-            <div className="flex-shrink-0 w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center">
-              <FiMessageSquare className="w-4 h-4 text-brand-dark" />
+            <div className="flex-shrink-0 w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md">
+              <FiMessageSquare className="w-4 h-4 text-white" />
             </div>
-            <div className="max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl shadow-lg bg-brand-slate text-brand-cream rounded-bl-md border border-brand-accent/20">
+            <div className="max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl shadow-lg bg-brand-slate/70 text-brand-cream rounded-bl-md border border-brand-slate/50 backdrop-blur-sm">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce [animation-delay:0.1s]"></div>
@@ -129,7 +129,7 @@ export default function ChatArea() {
       </div>
 
       {/* Input Area */}
-      <div className="p-6 border-t border-brand-slate/20 bg-brand-slate shadow-lg">
+      <div className="p-6 border-t border-brand-slate/30 bg-brand-slate/50 backdrop-blur-sm shadow-xl">
         <div className="flex gap-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
             <input
@@ -139,13 +139,13 @@ export default function ChatArea() {
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
               disabled={isLoading}
-              className="w-full px-4 py-3 pr-12 bg-brand-slate border border-brand-accent rounded-full text-brand-cream placeholder-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
+              className="w-full px-4 py-3 pr-12 bg-brand-slate/70 border border-brand-slate/50 rounded-full text-brand-cream placeholder-brand-light focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
             />
           </div>
           <button
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="px-6 py-3 bg-gradient-to-r from-brand-accent to-blue-600 hover:from-blue-600 hover:to-brand-accent text-white rounded-full transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="px-6 py-3 bg-gradient-brand hover:shadow-brand text-white rounded-full transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-95 font-semibold"
           >
             <FiSend className="w-4 h-4" />
             Send

@@ -21,12 +21,12 @@ export default function Button({
   type = 'button',
   className = '',
 }: ButtonProps) {
-  const baseClasses = 'px-4 py-2 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md';
+  const baseClasses = 'px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-dark disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg active:scale-95';
 
   const variantClasses = {
-    primary: 'bg-brand-accent hover:bg-brand-slate text-brand-dark focus:ring-brand-accent',
-    secondary: 'bg-brand-slate hover:bg-brand-accent text-brand-cream focus:ring-brand-slate',
-    danger: 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500',
+    primary: 'bg-gradient-brand text-white hover:shadow-brand focus:ring-brand-accent',
+    secondary: 'bg-brand-slate hover:bg-brand-light text-brand-cream focus:ring-brand-accent border border-brand-light/20',
+    danger: 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 shadow-md hover:shadow-lg',
   };
 
   return (

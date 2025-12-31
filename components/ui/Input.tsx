@@ -33,16 +33,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   name,
   autoComplete,
 }, ref) => {
-  const inputClasses = `block w-full px-3 py-2 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
+  const inputClasses = `block w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
     error
-      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-      : 'border-brand-accent/20 focus:ring-brand-accent focus:border-brand-accent'
-  } bg-brand-slate text-brand-cream placeholder-brand-cream/60 ${className}`;
+      ? 'border-red-500/50 focus:ring-red-500 focus:border-red-500 bg-red-500/5'
+      : 'border-brand-slate/50 focus:ring-brand-accent focus:border-brand-accent bg-brand-slate/50 hover:bg-brand-slate/70'
+  } text-brand-cream placeholder-brand-light/60 ${className}`;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-brand-cream">
+        <label htmlFor={id} className="block text-sm font-semibold text-brand-cream">
           {label}
         </label>
       )}
@@ -61,7 +61,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
         className={inputClasses}
       />
       {error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-red-400 font-medium">{error}</p>
       )}
     </div>
   );
