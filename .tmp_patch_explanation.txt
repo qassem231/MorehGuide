@@ -1,0 +1,1 @@
+Patch: replace systemPrompt block with single concatenated finalPrompt and hebrewRules; add debug logging later.

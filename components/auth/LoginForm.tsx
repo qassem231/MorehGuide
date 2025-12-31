@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
@@ -20,10 +18,42 @@ export default function LoginForm() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      console.log('🔐 [LOGIN FORM]: Submitting login form');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Save token to localStorage SYNCHRONOUSLY and IMMEDIATELY
+      console.log('💾 [LOGIN FORM]: Saving JWT token to localStorage');
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Verify the token was actually saved
+      const savedToken = localStorage.getItem('token');
+      console.log('✅ [LOGIN FORM]: Token saved and verified:', !!savedToken);
+
+      // Dispatch a custom event to notify other components that auth state changed
+      const authChangeEvent = new Event('authStateChanged');
+      window.dispatchEvent(authChangeEvent);
+
+      // Give a tiny delay to ensure localStorage is committed before redirect
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      console.log('✅ [LOGIN FORM]: Login successful, redirecting to /chat');
       router.push('/chat');
     } catch (error: any) {
-      setError(error.message);
+      console.error('❌ [LOGIN FORM]: Login error:', error);
+      setError(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }

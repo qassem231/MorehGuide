@@ -2,23 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function RegisterForm() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'student' | 'lecturer'>('student');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -29,20 +31,26 @@ export default function RegisterForm() {
     setError('');
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
-        role: role,
-        createdAt: serverTimestamp(),
-        chatHistory: []
+      console.log('📝 [REGISTER FORM]: Submitting registration form');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      console.log('✅ [REGISTER FORM]: Registration successful');
       router.push('/login');
     } catch (error: any) {
-      setError(error.message);
+      console.error('❌ [REGISTER FORM]: Registration error:', error);
+      setError(error.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +65,18 @@ export default function RegisterForm() {
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleRegister}>
         <div className="space-y-4">
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            label="Full name"
+            placeholder="Full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
+          />
+
           <Input
             id="email"
             name="email"
@@ -92,22 +112,6 @@ export default function RegisterForm() {
             required
             autoComplete="new-password"
           />
-
-          <div className="space-y-1">
-            <label htmlFor="role" className="block text-sm font-medium text-brand-cream">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as 'student' | 'lecturer')}
-              className="block w-full px-3 py-2 border border-brand-accent/20 bg-brand-slate text-brand-cream rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent sm:text-sm transition-all duration-200"
-            >
-              <option value="student">Student</option>
-              <option value="lecturer">Lecturer</option>
-            </select>
-          </div>
         </div>
 
         {error && (

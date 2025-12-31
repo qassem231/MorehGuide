@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef, useEffect } from 'react';
 import { FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
@@ -10,7 +12,7 @@ interface Message {
 
 export default function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: 'Hello! How can I help you today?' }
+    { role: 'bot', content: 'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

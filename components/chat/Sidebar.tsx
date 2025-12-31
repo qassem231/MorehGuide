@@ -1,3 +1,5 @@
+'use client';
+
 import { FiSettings, FiPlus, FiMessageSquare } from 'react-icons/fi';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import UploadButton from '../admin/UploadButton';

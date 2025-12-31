@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GoogleAIFileManager } from '@google/generative-ai/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
-
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+import {
+  uploadPdfToMongoDB,
+  uploadFileToGeminiAPI,
+  extractMetadataFromFile,
+  savePdfDocumentToMongoDB,
+} from '@/backend/storage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,37 +15,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    if (file.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Only PDF files are allowed' }, { status: 400 });
+    if (!file.type.includes('pdf')) {
+      return NextResponse.json({ error: 'File must be a PDF' }, { status: 400 });
     }
 
-    // Convert file to buffer for upload
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    console.log(`📁 [UPLOAD ROUTE]: Processing PDF: ${file.name}`);
 
-    // Upload file to Gemini using GoogleAIFileManager
-    const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY!);
-    const uploadResponse = await fileManager.uploadFile(fileBuffer, {
-      mimeType: file.type,
-      displayName: file.name,
-    });
+    // STEP 1: Convert File to Buffer
+    console.log(`🔄 [UPLOAD ROUTE]: Converting file to buffer...`);
+    const { buffer: fileBuffer } = await uploadPdfToMongoDB(file);
 
-    // Save to Firestore knowledge_base collection
-    const docRef = await addDoc(collection(db, 'knowledge_base'), {
-      name: file.name,
-      uri: uploadResponse.file.uri,
-      mimeType: uploadResponse.file.mimeType,
-      uploadedAt: new Date(),
-    });
+    // STEP 2: Upload to Gemini File API
+    console.log(`🚀 [UPLOAD ROUTE]: Uploading to Gemini File API...`);
+    const geminiFile = await uploadFileToGeminiAPI(file, fileBuffer);
+
+    // STEP 3: Extract metadata from the file using Gemini
+    console.log(`📝 [UPLOAD ROUTE]: Extracting metadata from document...`);
+    const metadata = await extractMetadataFromFile(geminiFile.uri, file.name);
+
+    // STEP 4: Save to MongoDB as Binary Blob
+    console.log(`💾 [UPLOAD ROUTE]: Saving document to MongoDB...`);
+    const docId = await savePdfDocumentToMongoDB(file.name, fileBuffer, metadata);
+
+    console.log(`✅ [UPLOAD ROUTE]: Document saved successfully with ID: ${docId}`);
 
     return NextResponse.json({
       success: true,
-      fileId: docRef.id,
-      name: file.name,
-      uri: uploadResponse.file.uri
+      message: 'PDF processed and saved successfully',
+      docId: docId,
+      fileName: file.name,
+      summary: metadata.summary,
     });
-
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+    console.error('❌ [UPLOAD ROUTE]: Upload error:', error);
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: `Upload failed: ${error.message}` },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Upload failed' },
+      { status: 500 }
+    );
   }
 }

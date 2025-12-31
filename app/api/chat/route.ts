@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+import {
+  fetchKnowledgeBaseMenu,
+  selectRelevantDocument,
+  generateGeneralResponse,
+  generateContextualResponse,
+  uploadFileToGeminiForChat,
+} from '@/backend/gemini';
 
 export async function POST(request: NextRequest) {
+  console.log('📨 [CHAT API]: Received Chat Request');
+  
   try {
     const { message } = await request.json();
 
@@ -13,70 +17,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No message provided' }, { status: 400 });
     }
 
-    // Query knowledge_base collection for all documents
-    const knowledgeBaseRef = collection(db, 'knowledge_base');
-    const snapshot = await getDocs(knowledgeBaseRef);
+    console.log(`💬 [CHAT API]: User message: "${message}"`);
 
-    // Build a single concatenated prompt (fail-safe) with the Hebrew rules
-    const hebrewRules = `אתה עוזר מומחה המענה על שאלות בהתבסס אך ורק על המסמכים PDF המסופקים.
+    let selectedDocId = 'NONE';
+    let geminiFileUri = '';
 
-ענה תמיד רק בעברית, ללא קשר לשפה שבה שאל המשתמש.
+    // STEP 1: Fetch lightweight knowledge base menu (IDs, filenames, metadata only)
+    console.log('📋 [CHAT API]: Step 1 - Fetching knowledge base menu');
+    const menu = await fetchKnowledgeBaseMenu();
 
-המסמכים ההקשר המסופקים הם בעברית. נתח אותם לעומק.
+    // STEP 2: Use Gemini to select the most relevant document
+    if (menu && menu.trim() !== '') {
+      console.log('🔍 [CHAT API]: Step 2 - Selecting relevant document');
+      selectedDocId = await selectRelevantDocument(message, menu);
 
-כל פעם שאתה מציין עובדה, אתה חייב לציין את המקור: סעיף, עמוד, או פסקה מההקשר (למשל, '[מקור: סעיף 4.2]').
-
-עצב את התשובה בצורה ברורה באמצעות Markdown:
-- השתמש **מודגש** למונחים מרכזיים.
-- השתמש ברשימות נקודות לרשימות.
-- השתמש ### כותרות להפרדת נושאים.
-
-אם התשובה לא נמצאת במסמכים, השב בדיוק: "לא מצאתי את המידע הזה במסמכים שהעלית. האם תרצה שאחפש נושא אחר?"`;
-
-    // Header + context + user question all concatenated into one string
-    let finalPrompt = 'System Instructions: ' + hebrewRules + '\n\n';
-
-    finalPrompt += 'Context from files:\n';
-    if (!snapshot.empty) {
-      snapshot.docs.forEach((doc, index) => {
-        const data = doc.data();
-        const content = data.content || data.text || JSON.stringify(data);
-        finalPrompt += `Document ${index + 1}:\n${content}\n\n`;
-      });
+      // STEP 3: If a document was selected, upload it to Gemini
+      if (selectedDocId !== 'NONE' && selectedDocId.length > 0) {
+        console.log(`📤 [CHAT API]: Step 3 - Uploading selected document to Gemini`);
+        try {
+          const uploadedFile = await uploadFileToGeminiForChat(selectedDocId);
+          geminiFileUri = uploadedFile.uri;
+          console.log(`✅ [CHAT API]: Document uploaded successfully`);
+        } catch (docError) {
+          console.warn(
+            `⚠️ [CHAT API]: Could not upload document ${selectedDocId}, falling back to general chat`,
+            docError
+          );
+          selectedDocId = 'NONE';
+          geminiFileUri = '';
+        }
+      }
     } else {
-      finalPrompt += 'No documents available.\n\n';
+      console.log('📭 [CHAT API]: No documents in knowledge base, using general chat');
     }
 
-    finalPrompt += 'User Question: ' + message;
+    // STEP 4: Generate response with or without context
+    let finalResponse = '';
 
-    // Construct Gemini payload with simple text
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-flash-latest',
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-      },
+    if (selectedDocId === 'NONE' || !geminiFileUri) {
+      console.log('🤖 [CHAT API]: Step 4 - Generating general response (no document context)');
+      finalResponse = await generateGeneralResponse(message);
+    } else {
+      console.log(`🤖 [CHAT API]: Step 4 - Generating contextual response with document ${selectedDocId}`);
+      finalResponse = await generateContextualResponse(message, geminiFileUri);
+    }
+
+    console.log('✅ [CHAT API]: Response generated successfully');
+
+    return NextResponse.json({
+      response: finalResponse,
+      selectedDocId: selectedDocId,
+      usedContext: selectedDocId !== 'NONE',
     });
-
-    const result = await model.generateContent(finalPrompt);
-
-    console.log('Raw Gemini Response:', JSON.stringify(result, null, 2));
-
-    const response = result.response;
-    const text = response.text();
-
-    return NextResponse.json({ response: text });
-
   } catch (error) {
-    console.error('Chat error:', error);
+    console.error('❌ [CHAT API]: Chat error:', error);
 
-    // Handle specific Google AI errors
     if (error instanceof Object && 'status' in error) {
       const status = (error as any).status;
       if (status === 429) {
-        return NextResponse.json({ error: 'API quota exceeded. Please check your Google AI Studio billing and rate limits.' }, { status: 429 });
+        return NextResponse.json(
+          { error: 'API quota exceeded. Please check your Google AI Studio billing and rate limits.' },
+          { status: 429 }
+        );
       }
       if (status === 400) {
         return NextResponse.json({ error: 'Invalid request. Please check your message content.' }, { status: 400 });
@@ -86,11 +88,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle GoogleGenerativeAI specific errors
     if (error instanceof Error && error.message.includes('Response was blocked due to')) {
-      return NextResponse.json({
-        error: 'התגובה נחסמה על ידי מערכת הבטיחות של Google AI. אנא נסה לשאול שאלה אחרת או פנה למנהל המערכת.'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'התגובה נחסמה על ידי מערכת הבטיחות של Google AI. אנא נסה לשאול שאלה אחרת או פנה למנהל המערכת.',
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 });
