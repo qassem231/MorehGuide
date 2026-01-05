@@ -6,13 +6,17 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface Message {
-  role: 'user' | 'bot';
+  role: 'user' | 'assistant';
   content: string;
 }
 
 export default function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: 'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.' }
+    {
+      role: 'assistant',
+      content:
+        'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
+    },
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,15 +34,18 @@ export default function ChatArea() {
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
+      const token = localStorage.getItem('token');
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
         },
         body: JSON.stringify({ message: input }),
       });
@@ -48,16 +55,48 @@ export default function ChatArea() {
       }
 
       const data = await response.json();
-      const botMessage: Message = { role: 'bot', content: data.response };
-      setMessages(prev => [...prev, botMessage]);
+      const assistantMessage: Message = { role: 'assistant', content: data.response };
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
-      const errorMessage: Message = { role: 'bot', content: 'Sorry, I encountered an error. Please try again.' };
-      setMessages(prev => [...prev, errorMessage]);
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+  const loadHistory = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const res = await fetch('/api/chat', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) return;
+
+      const data: { messages?: Message[] } = await res.json();
+
+      if (Array.isArray(data.messages) && data.messages.length > 0) {
+        setMessages(data.messages);
+      }
+    } catch (e) {
+      console.error('Failed to load chat history:', e);
+    }
+  };
+
+  loadHistory();
+}, []);
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -75,7 +114,7 @@ export default function ChatArea() {
             key={index}
             className={`flex items-start space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            {message.role === 'bot' && (
+            {message.role === 'assistant' && (
               <div className="flex-shrink-0 w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md">
                 <FiMessageSquare className="w-4 h-4 text-white" />
               </div>

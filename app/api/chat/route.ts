@@ -9,10 +9,75 @@ import {
   uploadFileToGeminiForChat,
 } from '@/backend/gemini';
 
-export async function POST(request: NextRequest) {
-  console.log('📨 [CHAT API]: Received Chat Request');
-  
+import { connectToDatabase } from '@/lib/db';
+import { verifyToken } from '@/lib/auth';
+import ChatHistory from '@/backend/models/ChatHistory';
+
+/**
+ * Extract JWT token from:
+ * 1) Authorization: Bearer <token>
+ * 2) Cookie named "token"
+ */
+function extractToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+
+  const cookieToken = request.cookies.get('token')?.value;
+  if (cookieToken && cookieToken.trim() !== '') {
+    return cookieToken.trim();
+  }
+
+  return null;
+}
+
+async function getUserFromRequest(request: NextRequest) {
+  const token = extractToken(request);
+  if (!token) return null;
+  return await verifyToken(token);
+}
+
+/**
+ * GET /api/chat
+ * Returns the current user's saved chat messages.
+ */
+export async function GET(request: NextRequest) {
+  console.log('📥 [CHAT API]: Received Chat History Request (GET)');
+
   try {
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await connectToDatabase();
+
+    const history = await ChatHistory.findOne({ userId: user.userId }).lean();
+
+    return NextResponse.json({
+      messages: history?.messages ?? [],
+    });
+  } catch (error) {
+    console.error('❌ [CHAT API]: GET history error:', error);
+    return NextResponse.json({ error: 'Failed to load chat history' }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/chat
+ * Generates an answer (same as before), then appends user + assistant messages
+ * to the current user's chat history.
+ */
+export async function POST(request: NextRequest) {
+  console.log('📨 [CHAT API]: Received Chat Request (POST)');
+
+  try {
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { message } = await request.json();
 
     if (!message) {
@@ -35,11 +100,11 @@ export async function POST(request: NextRequest) {
 
       // STEP 3: If a document was selected, upload it to Gemini
       if (selectedDocId !== 'NONE' && selectedDocId.length > 0) {
-        console.log(`📤 [CHAT API]: Step 3 - Uploading selected document to Gemini`);
+        console.log('📤 [CHAT API]: Step 3 - Uploading selected document to Gemini');
         try {
           const uploadedFile = await uploadFileToGeminiForChat(selectedDocId);
           geminiFileUri = uploadedFile.uri;
-          console.log(`✅ [CHAT API]: Document uploaded successfully`);
+          console.log('✅ [CHAT API]: Document uploaded successfully');
         } catch (docError) {
           console.warn(
             `⚠️ [CHAT API]: Could not upload document ${selectedDocId}, falling back to general chat`,
@@ -65,6 +130,27 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ [CHAT API]: Response generated successfully');
+
+    // STEP 5: Persist chat history (append user + assistant)
+    await connectToDatabase();
+
+    const now = new Date();
+    const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
+    const assistantMsg = { role: 'assistant' as const, content: String(finalResponse), createdAt: new Date() };
+
+    // Keep history from growing forever (last 200 messages)
+    await ChatHistory.findOneAndUpdate(
+      { userId: user.userId },
+      {
+        $push: {
+          messages: {
+            $each: [userMsg, assistantMsg],
+            $slice: -200,
+          },
+        },
+      },
+      { upsert: true, new: true }
+    );
 
     return NextResponse.json({
       response: finalResponse,
