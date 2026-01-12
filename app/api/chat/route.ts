@@ -12,6 +12,7 @@ import {
 import { connectToDatabase } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import ChatHistory from '@/backend/models/ChatHistory';
+import Chat from '@/backend/models/Chat';
 
 /**
  * Extract JWT token from:
@@ -40,7 +41,8 @@ async function getUserFromRequest(request: NextRequest) {
 
 /**
  * GET /api/chat
- * Returns the current user's saved chat messages.
+ * Returns the chat messages for a specific chatId.
+ * Query params: ?chatId=<id> (optional - if provided, fetch from Chat collection; otherwise use legacy ChatHistory)
  */
 export async function GET(request: NextRequest) {
   console.log('📥 [CHAT API]: Received Chat History Request (GET)');
@@ -51,8 +53,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const chatId = searchParams.get('chatId');
+
     await connectToDatabase();
 
+    // If chatId is provided, fetch from new Chat collection
+    if (chatId) {
+      const chat = await Chat.findOne({ chatId, userId: user.userId }).lean();
+      return NextResponse.json({
+        messages: chat?.messages ?? [],
+      });
+    }
+
+    // Otherwise, fetch from legacy ChatHistory (for backward compatibility)
     const history = await ChatHistory.findOne({ userId: user.userId }).lean();
 
     return NextResponse.json({
@@ -66,8 +80,8 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/chat
- * Generates an answer (same as before), then appends user + assistant messages
- * to the current user's chat history.
+ * Generates an answer (same as before), then appends user + assistant messages.
+ * If chatId is provided in body, saves to Chat collection; otherwise to ChatHistory (legacy).
  */
 export async function POST(request: NextRequest) {
   console.log('📨 [CHAT API]: Received Chat Request (POST)');
@@ -78,7 +92,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { message } = await request.json();
+    const { message, chatId } = await request.json();
 
     if (!message) {
       return NextResponse.json({ error: 'No message provided' }, { status: 400 });
@@ -131,26 +145,41 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [CHAT API]: Response generated successfully');
 
-    // STEP 5: Persist chat history (append user + assistant)
+    // STEP 5: Persist chat history (append assistant message to the appropriate collection)
     await connectToDatabase();
 
-    const now = new Date();
-    const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
     const assistantMsg = { role: 'assistant' as const, content: String(finalResponse), createdAt: new Date() };
 
-    // Keep history from growing forever (last 200 messages)
-    await ChatHistory.findOneAndUpdate(
-      { userId: user.userId },
-      {
-        $push: {
-          messages: {
-            $each: [userMsg, assistantMsg],
-            $slice: -200,
+    if (chatId) {
+      // Save to new Chat collection
+      await Chat.findOneAndUpdate(
+        { chatId, userId: user.userId },
+        {
+          $push: {
+            messages: assistantMsg,
           },
         },
-      },
-      { upsert: true, new: true }
-    );
+        { new: true }
+      );
+    } else {
+      // Keep history from growing forever (last 200 messages)
+      // Save to legacy ChatHistory collection
+      const now = new Date();
+      const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
+
+      await ChatHistory.findOneAndUpdate(
+        { userId: user.userId },
+        {
+          $push: {
+            messages: {
+              $each: [userMsg, assistantMsg],
+              $slice: -200,
+            },
+          },
+        },
+        { upsert: true, new: true }
+      );
+    }
 
     return NextResponse.json({
       response: finalResponse,

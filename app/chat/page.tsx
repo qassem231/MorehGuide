@@ -15,6 +15,15 @@ interface User {
 export default function Chat() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
+    {
+      role: 'assistant',
+      content:
+        'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
+    },
+  ]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,6 +74,32 @@ export default function Chat() {
     };
   }, [router]);
 
+  const handleChatSelect = (chatId: string | null) => {
+    console.log('handleChatSelect called with:', chatId);
+    setCurrentChatId(chatId);
+    
+    // If chatId is null (New Chat), clear messages and show initial greeting
+    if (chatId === null) {
+      console.log('Clearing messages for new chat');
+      setMessages([
+        {
+          role: 'assistant',
+          content:
+            'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
+        },
+      ]);
+    }
+  };
+
+  const handleChatIdChange = (chatId: string) => {
+    setCurrentChatId(chatId);
+  };
+
+  const handleNewChatCreated = () => {
+    // Trigger sidebar to refresh the chat list
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
   // Render loading state while checking authorization
   if (!isAuthorized) {
     return (
@@ -82,8 +117,20 @@ export default function Chat() {
   // Render chat interface once authorized
   return (
     <div className="flex h-[calc(100vh-64px)] bg-brand-dark">
-      <Sidebar userRole={user?.role || 'user'} />
-      <ChatArea />
+      <Sidebar 
+        userRole={user?.role || 'user'} 
+        currentChatId={currentChatId} 
+        onChatSelect={handleChatSelect}
+        refreshTrigger={refreshTrigger}
+      />
+      <ChatArea 
+        key={currentChatId}
+        currentChatId={currentChatId} 
+        messages={messages}
+        setMessages={setMessages}
+        onChatIdChange={handleChatIdChange}
+        onNewChatCreated={handleNewChatCreated}
+      />
     </div>
   );
 }

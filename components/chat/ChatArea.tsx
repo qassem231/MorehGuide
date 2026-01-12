@@ -10,17 +10,66 @@ interface Message {
   content: string;
 }
 
-export default function ChatArea() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content:
-        'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
-    },
-  ]);
+interface ChatAreaProps {
+  currentChatId: string | null;
+  messages: Message[];
+  setMessages: (messages: Message[]) => void;
+  onChatIdChange?: (chatId: string) => void;
+  onNewChatCreated?: () => void;
+}
+
+export default function ChatArea({ currentChatId, messages, setMessages, onChatIdChange, onNewChatCreated }: ChatAreaProps) {
+  console.log('ChatArea component rendered with currentChatId:', currentChatId, 'messages count:', messages.length);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load chat history when currentChatId changes
+  useEffect(() => {
+    console.log('ChatArea useEffect triggered, currentChatId:', currentChatId);
+    if (!currentChatId) {
+      // Messages already cleared by parent component
+      console.log('currentChatId is null, messages already cleared by parent');
+      return;
+    }
+
+    const loadChatHistory = async () => {
+      try {
+        console.log('Loading chat history for:', currentChatId);
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await fetch(`/api/chat?chatId=${currentChatId}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data: { messages?: Message[] } = await res.json();
+
+        if (Array.isArray(data.messages) && data.messages.length > 0) {
+          console.log('Loaded', data.messages.length, 'messages');
+          setMessages(data.messages);
+        } else {
+          console.log('No messages found, showing initial greeting');
+          setMessages([
+            {
+              role: 'assistant',
+              content:
+                'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
+            },
+          ]);
+        }
+      } catch (e) {
+        console.error('Failed to load chat history:', e);
+      }
+    };
+
+    loadChatHistory();
+  }, [currentChatId, setMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,6 +83,8 @@ export default function ChatArea() {
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: input };
+    const userInput = input;
+    
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -41,13 +92,50 @@ export default function ChatArea() {
     try {
       const token = localStorage.getItem('token');
 
+      // Step 1: Create new chat if needed (this saves the first user message)
+      let activeChatId = currentChatId;
+      if (!activeChatId) {
+        const chatRes = await fetch('/api/chats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+          body: JSON.stringify({
+            message: userInput,
+            isFirstMessage: true,
+          }),
+        });
+
+        if (!chatRes.ok) {
+          throw new Error('Failed to create chat');
+        }
+
+        const chatData = await chatRes.json();
+        activeChatId = chatData.chatId;
+
+        // Notify parent component of new chat ID
+        if (onChatIdChange) {
+          onChatIdChange(activeChatId);
+        }
+
+        // Notify sidebar to refresh chat list
+        if (onNewChatCreated) {
+          onNewChatCreated();
+        }
+      }
+
+      // Step 2: Get AI response (this also saves the assistant message to chat)
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: token ? `Bearer ${token}` : '',
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ 
+          message: userInput,
+          chatId: activeChatId,
+        }),
       });
 
       if (!response.ok) {
@@ -68,35 +156,6 @@ export default function ChatArea() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-  const loadHistory = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const res = await fetch('/api/chat', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) return;
-
-      const data: { messages?: Message[] } = await res.json();
-
-      if (Array.isArray(data.messages) && data.messages.length > 0) {
-        setMessages(data.messages);
-      }
-    } catch (e) {
-      console.error('Failed to load chat history:', e);
-    }
-  };
-
-  loadHistory();
-}, []);
-
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
