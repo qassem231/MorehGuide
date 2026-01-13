@@ -113,7 +113,7 @@ export default function Chat() {
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-brand-dark">
       {!isAuthorized ? (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-dark via-brand-slate to-brand-dark">
+        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark">
           <div className="text-center">
             <div className="animate-spin inline-block w-12 h-12 border-4 border-brand-accent/30 border-t-brand-accent rounded-full mb-4"></div>
             <p className="text-brand-light">Loading...</p>
@@ -122,7 +122,7 @@ export default function Chat() {
       ) : (
         <>
           <Sidebar
-            userRole={user?.role}
+            userRole={user?.role || null}
             currentChatId={currentChatId}
             onChatSelect={handleChatSelect}
             refreshTrigger={refreshTrigger}

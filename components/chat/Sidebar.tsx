@@ -163,7 +163,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
   return (
     <div className="w-64 h-full bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30 overflow-hidden">
       {/* Top Section - Logo & New Chat Button */}
-      <div className="flex-shrink-0 border-b border-brand-slate/30 flex flex-col gap-2 p-2">
+      <div className="shrink-0 border-b border-brand-slate/30 flex flex-col gap-2 p-2">
         <div className="text-center">
           <p className="text-sm font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</p>
         </div>
@@ -201,7 +201,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
                   onClick={() => handleChatSelect(chat.chatId)}
                   className="flex-1 flex items-center gap-2 text-left truncate"
                 >
-                  <FiMessageSquare className="w-4 h-4 text-brand-light/60 group-hover:text-brand-accent flex-shrink-0" />
+                  <FiMessageSquare className="w-4 h-4 text-brand-light/60 group-hover:text-brand-accent shrink-0" />
                   <span className="text-sm text-brand-cream/80 group-hover:text-brand-cream truncate">
                     {chat.title}
                   </span>
@@ -225,7 +225,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
       )}
 
       {/* Bottom Section - Upload & Profile (Always Visible) */}
-      <div className="flex-shrink-0 flex flex-col">
+      <div className="shrink-0 flex flex-col">
         {isSystemAdmin && !isGuest && (
           <div className="p-4 border-b border-brand-slate/30">
             <UploadButton />
@@ -237,7 +237,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
           <div className="p-2">
             <Link href="/settings" className="w-full flex items-center gap-3 px-3 py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
               {/* Profile Picture */}
-              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
                 {user.profilePicture ? (
                   <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
@@ -274,7 +274,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
           <div className="p-2">
             <div className="w-full flex items-center gap-3 px-3 py-3 rounded-lg">
               {/* Profile Picture */}
-              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
                 <span className="text-white font-semibold text-sm">G</span>
               </div>
               

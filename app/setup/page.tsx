@@ -70,7 +70,7 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="h-full bg-gradient-to-br from-brand-dark via-brand-slate to-brand-dark flex items-center justify-center p-4">
+    <div className="h-full bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark flex items-center justify-center p-4">
       <div className="bg-brand-dark border border-brand-slate/30 rounded-lg p-8 max-w-md w-full shadow-lg">
         <h1 className="text-3xl font-bold text-brand-cream mb-4">Admin Setup</h1>
         <p className="text-brand-light mb-6">

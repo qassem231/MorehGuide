@@ -117,7 +117,7 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div className="h-full bg-gradient-to-br from-brand-dark via-[#0f172a] to-brand-slate flex items-center justify-center p-4">
+    <div className="h-full bg-linear-to-br from-brand-dark via-brand-dark to-brand-slate flex items-center justify-center p-4">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
@@ -161,7 +161,7 @@ export default function RoleSelectionPage() {
               ${selectedRole === 'student' ? 'ring-2 ring-blue-500 bg-blue-500/10' : ''}`}
             >
               {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               {/* Content */}
               <div className="relative z-10 text-center">
@@ -184,7 +184,7 @@ export default function RoleSelectionPage() {
               </div>
 
               {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </button>
 
@@ -200,7 +200,7 @@ export default function RoleSelectionPage() {
               ${selectedRole === 'lecturer' ? 'ring-2 ring-purple-500 bg-purple-500/10' : ''}`}
             >
               {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-linear-to-br from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               {/* Content */}
               <div className="relative z-10 text-center">
@@ -223,7 +223,7 @@ export default function RoleSelectionPage() {
               </div>
 
               {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </button>
         </div>

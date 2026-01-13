@@ -13,7 +13,7 @@ interface Message {
 interface ChatAreaProps {
   currentChatId: string | null;
   messages: Message[];
-  setMessages: (messages: Message[]) => void;
+  setMessages: (messages: Message[] | ((prev: Message[]) => Message[])) => void;
   onChatIdChange?: (chatId: string) => void;
   onNewChatCreated?: () => void;
   isGuest?: boolean;
@@ -86,7 +86,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
     const userMessage: Message = { role: 'user', content: input };
     const userInput = input;
     
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev: Message[]) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
@@ -94,7 +94,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
       const token = localStorage.getItem('token');
 
       // Step 1: Create new chat if needed (skip for guests)
-      let activeChatId = currentChatId;
+      let activeChatId: string | null = currentChatId;
       if (!activeChatId && !isGuest) {
         const chatRes = await fetch('/api/chats', {
           method: 'POST',
@@ -116,7 +116,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         activeChatId = chatData.chatId;
 
         // Notify parent component of new chat ID
-        if (onChatIdChange) {
+        if (onChatIdChange && activeChatId) {
           onChatIdChange(activeChatId);
         }
 
@@ -145,14 +145,14 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
 
       const data = await response.json();
       const assistantMessage: Message = { role: 'assistant', content: data.response };
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev: Message[]) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev: Message[]) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -168,7 +168,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-brand-dark relative">
       {/* Top Bar with Header */}
-      <div className="flex-shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm flex items-center px-6">
+      <div className="shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm flex items-center px-6">
         <span className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</span>
       </div>
 

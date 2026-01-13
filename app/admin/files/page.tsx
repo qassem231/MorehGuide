@@ -4,8 +4,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiTrash2, FiFileText, FiCloud, FiArrowLeft, FiCheck, FiEdit2, FiX } from 'react-icons/fi';
 
+interface PdfFile {
+  _id: string;
+  name?: string;
+  fileName?: string;
+  audience?: 'student' | 'lecturer' | 'everyone';
+  uploadDate?: string;
+  createdAt?: string;
+}
+
 export default function AdminFilesPage() {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<PdfFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -245,7 +254,7 @@ export default function AdminFilesPage() {
   };
 
   return (
-    <div className="h-full bg-gradient-to-br from-brand-dark via-brand-slate to-brand-dark p-8">
+    <div className="h-full bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark p-8">
       <div className="max-w-7xl mx-auto">
         {/* Authorization Check */}
         {!isAuthorized && (
@@ -346,7 +355,7 @@ export default function AdminFilesPage() {
                       <tr key={file._id} className="hover:bg-brand-slate/20 transition-colors duration-200">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
-                            <FiFileText className="w-5 h-5 text-brand-accent flex-shrink-0" />
+                            <FiFileText className="w-5 h-5 text-brand-accent shrink-0" />
                             <span className="text-brand-cream font-medium">{file.name || file.fileName || 'Unnamed'}</span>
                           </div>
                         </td>

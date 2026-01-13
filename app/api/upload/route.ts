@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const audience = (formData.get('audience') as string) || 'everyone';
+    const audience = ((formData.get('audience') as string) || 'everyone') as 'student' | 'lecturer' | 'everyone';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });

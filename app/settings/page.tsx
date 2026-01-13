@@ -158,7 +158,7 @@ export default function SettingsPage() {
   const roleLabel = user.role === 'admin' ? 'Lecturer' : 'Student';
 
   return (
-    <div className="h-full bg-gradient-to-br from-brand-dark via-brand-slate to-brand-dark\">
+    <div className="h-full bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark">
       <div className="max-w-7xl mx-auto p-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
