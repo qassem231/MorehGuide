@@ -123,8 +123,8 @@ export default function Chat() {
         </div>
       ) : (
         <>
-          {/* Desktop Sidebar */}
-          <div className="hidden md:flex md:w-64 md:shrink-0">
+          {/* Desktop Sidebar - Only visible on large screens */}
+          <aside className="hidden lg:flex lg:w-64 lg:shrink-0">
             <Sidebar
               userRole={user?.role || null}
               currentChatId={currentChatId}
@@ -132,18 +132,18 @@ export default function Chat() {
               refreshTrigger={refreshTrigger}
               isGuest={isGuest}
             />
-          </div>
+          </aside>
 
-          {/* Mobile Sidebar Overlay - Only on small screens */}
+          {/* Mobile Sidebar Overlay - Fixed overlay on small screens */}
           {isMobileSidebarOpen && (
             <>
               {/* Backdrop */}
               <div
-                className="fixed inset-0 bg-black/50 z-30 md:hidden"
+                className="fixed inset-0 bg-black/50 z-30 lg:hidden"
                 onClick={() => setIsMobileSidebarOpen(false)}
               ></div>
-              {/* Sidebar */}
-              <div className="fixed left-0 top-16 bottom-0 w-64 bg-brand-slate border-r border-brand-slate/30 overflow-y-auto z-40 md:hidden shadow-xl">
+              {/* Sidebar - Fixed overlay */}
+              <nav className="fixed inset-y-0 left-0 w-64 bg-brand-slate border-r border-brand-slate/30 overflow-y-auto z-50 lg:hidden shadow-xl">
                 <Sidebar
                   userRole={user?.role || null}
                   currentChatId={currentChatId}
@@ -154,7 +154,7 @@ export default function Chat() {
                   refreshTrigger={refreshTrigger}
                   isGuest={isGuest}
                 />
-              </div>
+              </nav>
             </>
           )}
 

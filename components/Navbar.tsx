@@ -215,7 +215,7 @@ export default function Navbar({}: NavbarProps = {}) {
           </div>
 
           {/* Mobile Menu Button + Sidebar Toggle */}
-          <div className="sm:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-2">
             {/* Sidebar Toggle (only show on chat page) */}
             {pathname === '/chat' && (
               <button
