@@ -166,26 +166,26 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-brand-dark relative w-full">
+    <div className="flex-1 flex flex-col h-[calc(100dvh-theme(spacing.16))] overflow-hidden bg-brand-dark relative w-full">
       {/* Top Bar with Header */}
       <div className="shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm flex items-center px-6">
         <span className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</span>
       </div>
 
       {/* Scrollable Messages Area */}
-      <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 pb-32 p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 pb-32 px-2 sm:px-4 py-4 space-y-4">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex items-start space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-start space-x-1 sm:space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} px-1 sm:px-0`}
           >
             {message.role === 'assistant' && (
-              <div className="shrink-0 w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md">
-                <FiMessageSquare className="w-4 h-4 text-white" />
+              <div className="shrink-0 w-7 sm:w-8 h-7 sm:h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                <FiMessageSquare className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-white" />
               </div>
             )}
             <div
-              className={`max-w-xs lg:max-w-sm px-4 py-3 rounded-lg shadow-lg ${
+              className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-lg shadow-lg ${
                 message.role === 'user'
                   ? 'bg-gradient-brand text-white rounded-br-none shadow-brand'
                   : 'bg-brand-slate/70 text-brand-cream rounded-bl-none border border-brand-slate/50 backdrop-blur-sm'
@@ -209,8 +209,8 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
               </ReactMarkdown>
             </div>
             {message.role === 'user' && (
-              <div className="shrink-0 w-8 h-8 bg-brand-slate rounded-full flex items-center justify-center shadow-md">
-                <FiUser className="w-4 h-4 text-brand-accent" />
+              <div className="shrink-0 w-7 sm:w-8 h-7 sm:h-8 bg-brand-slate rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                <FiUser className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-brand-accent" />
               </div>
             )}
           </div>

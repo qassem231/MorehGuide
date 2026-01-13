@@ -208,8 +208,9 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
                 </button>
                 <button
                   onClick={(e) => handleDeleteChat(e, chat._id)}
-                  className="p-1.5 rounded hover:bg-red-500/20 text-brand-light/60 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-1.5 rounded hover:bg-red-500/20 text-brand-light/60 hover:text-red-400 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
                   title="Delete chat"
+                  aria-label="Delete chat"
                 >
                   <FiTrash2 className="w-4 h-4" />
                 </button>
