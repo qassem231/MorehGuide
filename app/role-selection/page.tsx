@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FiBookOpen, FiUserCheck } from 'react-icons/fi';
 
-export default function RoleSelectionPage() {
+export const dynamic = 'force-dynamic';
+
+function RoleSelectionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isGuest = searchParams.get('guest') === 'true';
@@ -242,5 +244,13 @@ export default function RoleSelectionPage() {
       </div>
       )}
     </div>
+  );
+}
+
+export default function RoleSelectionPage() {
+  return (
+    <Suspense fallback={<div className='flex h-screen items-center justify-center bg-linear-to-br from-brand-dark via-brand-dark to-brand-slate'><div className='text-center'><div className='animate-spin rounded-full h-16 w-16 border-b-2 border-brand-accent'></div><p className='text-brand-cream text-sm mt-4'>Loading...</p></div></div>}>
+      <RoleSelectionContent />
+    </Suspense>
   );
 }
