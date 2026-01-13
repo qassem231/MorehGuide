@@ -16,10 +16,11 @@ interface ChatAreaProps {
   setMessages: (messages: Message[]) => void;
   onChatIdChange?: (chatId: string) => void;
   onNewChatCreated?: () => void;
+  isGuest?: boolean;
 }
 
-export default function ChatArea({ currentChatId, messages, setMessages, onChatIdChange, onNewChatCreated }: ChatAreaProps) {
-  console.log('ChatArea component rendered with currentChatId:', currentChatId, 'messages count:', messages.length);
+export default function ChatArea({ currentChatId, messages, setMessages, onChatIdChange, onNewChatCreated, isGuest = false }: ChatAreaProps) {
+  console.log('ChatArea component rendered with currentChatId:', currentChatId, 'messages count:', messages.length, 'isGuest:', isGuest);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -92,9 +93,9 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
     try {
       const token = localStorage.getItem('token');
 
-      // Step 1: Create new chat if needed (this saves the first user message)
+      // Step 1: Create new chat if needed (skip for guests)
       let activeChatId = currentChatId;
-      if (!activeChatId) {
+      if (!activeChatId && !isGuest) {
         const chatRes = await fetch('/api/chats', {
           method: 'POST',
           headers: {
@@ -125,7 +126,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         }
       }
 
-      // Step 2: Get AI response (this also saves the assistant message to chat)
+      // Step 2: Get AI response (skips saving for guests)
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {

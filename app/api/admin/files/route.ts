@@ -59,9 +59,15 @@ export async function GET(request: NextRequest) {
     const files = await db
       .collection('pdfdocuments')
       .find({})
-      .project({ fileData: 0, content: 0 })
+      .project({ 
+        fileData: 0, 
+        content: 0,
+      })
       .sort({ createdAt: -1 })
       .toArray();
+    
+    console.log(`📋 [ADMIN FILES API]: Retrieved ${files.length} files`);
+    console.log(`📋 [ADMIN FILES API]: Sample file:`, files[0] || 'No files');
     
     return NextResponse.json(files);
   } catch (error: any) {

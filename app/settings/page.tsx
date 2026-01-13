@@ -287,9 +287,17 @@ export default function SettingsPage() {
                       className="w-full bg-brand-dark/50 border border-brand-slate/50 rounded-lg px-4 py-3 text-brand-cream focus:outline-none focus:border-brand-accent transition-colors"
                     />
                   </div>
+                </div>
+              </div>
+            )}
 
-                  {/* Email Field */}
-                  <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
+            {/* Security Tab */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                {/* Email Section */}
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
+                  <h3 className="text-2xl font-bold text-brand-cream mb-6">Email Address</h3>
+                  <div className="bg-brand-slate/30 border border-brand-slate/50 rounded-xl p-6">
                     <label className="block text-sm text-brand-light/70 mb-2 font-semibold">Email Address</label>
                     <input
                       type="email"
@@ -297,22 +305,21 @@ export default function SettingsPage() {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       className="w-full bg-brand-dark/50 border border-brand-slate/50 rounded-lg px-4 py-3 text-brand-cream focus:outline-none focus:border-brand-accent transition-colors"
                     />
+                    <p className="text-xs text-brand-light/50 mt-2">Your email is used for account recovery and notifications</p>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Security Tab */}
-            {activeTab === 'security' && (
-              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-brand-cream mb-6">Security Settings</h3>
-                <div className="space-y-4">
-                  <div className="bg-brand-slate/30 border border-brand-slate/50 rounded-xl p-6">
-                    <h4 className="text-lg font-semibold text-brand-cream mb-2">Password Management</h4>
-                    <p className="text-brand-light/70 mb-4">Change your password regularly to keep your account secure.</p>
-                    <button className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg transition-all border border-blue-500/30">
-                      Change Password
-                    </button>
+                {/* Password Management */}
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
+                  <h3 className="text-2xl font-bold text-brand-cream mb-6">Security Settings</h3>
+                  <div className="space-y-4">
+                    <div className="bg-brand-slate/30 border border-brand-slate/50 rounded-xl p-6">
+                      <h4 className="text-lg font-semibold text-brand-cream mb-2">Password Management</h4>
+                      <p className="text-brand-light/70 mb-4">Change your password regularly to keep your account secure.</p>
+                      <button className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg transition-all border border-blue-500/30">
+                        Change Password
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

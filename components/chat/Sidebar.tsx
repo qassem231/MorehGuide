@@ -17,9 +17,10 @@ interface SidebarProps {
   currentChatId: string | null;
   onChatSelect: (chatId: string | null) => void;
   refreshTrigger?: number;
+  isGuest?: boolean;
 }
 
-export default function Sidebar({ userRole, currentChatId, onChatSelect, refreshTrigger }: SidebarProps) {
+export default function Sidebar({ userRole, currentChatId, onChatSelect, refreshTrigger, isGuest = false }: SidebarProps) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -36,9 +37,16 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
       try {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
+        const activeRole = localStorage.getItem('activeRole');
         
         if (userData) {
-          setUser(JSON.parse(userData));
+          const parsedUser = JSON.parse(userData);
+          // Merge activeRole from localStorage if it exists
+          if (activeRole) {
+            parsedUser.activeRole = activeRole;
+          }
+          console.log('👤 [SIDEBAR]: User with activeRole:', parsedUser);
+          setUser(parsedUser);
         }
 
         if (!token) {
@@ -72,14 +80,28 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
   useEffect(() => {
     const handleAuthStateChanged = () => {
       const userData = localStorage.getItem('user');
+      const activeRole = localStorage.getItem('activeRole');
       if (userData) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        if (activeRole) {
+          parsedUser.activeRole = activeRole;
+        }
+        console.log('🔄 [SIDEBAR]: User data updated:', parsedUser);
+        setUser(parsedUser);
       }
     };
 
+    // Also listen for userDataUpdated event (from role-selection)
+    const handleUserDataUpdated = () => {
+      console.log('🔄 [SIDEBAR]: userDataUpdated event received');
+      handleAuthStateChanged();
+    };
+
     window.addEventListener('authStateChanged', handleAuthStateChanged);
+    window.addEventListener('userDataUpdated', handleUserDataUpdated);
     return () => {
       window.removeEventListener('authStateChanged', handleAuthStateChanged);
+      window.removeEventListener('userDataUpdated', handleUserDataUpdated);
     };
   }, []);
 
@@ -154,24 +176,25 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
         </button>
       </div>
 
-      {/* Middle Section - Recent Chats (Scrollable Only) */}
-      <div className="flex-1 overflow-y-auto min-h-0 p-1 border-b border-brand-slate/30">
-        <p className="text-xs text-brand-light/70 font-semibold px-3 py-2 uppercase tracking-wider">
-          Recent Chats
-        </p>
-        <div className="space-y-1">
-          {isLoading ? (
-            <p className="text-xs text-brand-light/50 px-3 py-2">Loading chats...</p>
-          ) : chats.length === 0 ? (
-            <p className="text-xs text-brand-light/50 px-3 py-2">No chats yet</p>
-          ) : (
-            chats.map((chat) => (
-              <div
-                key={chat._id}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group ${
-                  currentChatId === chat.chatId
-                    ? 'bg-brand-slate/80 border-l-2 border-brand-accent'
-                    : 'hover:bg-brand-slate/50'
+      {/* Middle Section - Recent Chats (Scrollable Only) - Hidden for Guests */}
+      {!isGuest ? (
+        <div className="flex-1 overflow-y-auto min-h-0 p-1 border-b border-brand-slate/30">
+          <p className="text-xs text-brand-light/70 font-semibold px-3 py-2 uppercase tracking-wider">
+            Recent Chats
+          </p>
+          <div className="space-y-1">
+            {isLoading ? (
+              <p className="text-xs text-brand-light/50 px-3 py-2">Loading chats...</p>
+            ) : chats.length === 0 ? (
+              <p className="text-xs text-brand-light/50 px-3 py-2">No chats yet</p>
+            ) : (
+              chats.map((chat) => (
+                <div
+                  key={chat._id}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group ${
+                    currentChatId === chat.chatId
+                      ? 'bg-brand-slate/80 border-l-2 border-brand-accent'
+                      : 'hover:bg-brand-slate/50'
                 }`}
               >
                 <button
@@ -193,20 +216,24 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
               </div>
             ))
           )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center border-b border-brand-slate/30">
+          <p className="text-xs text-brand-light/50 text-center">Guest mode: No chat history</p>
+        </div>
+      )}
 
       {/* Bottom Section - Upload & Profile (Always Visible) */}
       <div className="flex-shrink-0 flex flex-col">
-        {/* Admin Upload Button for Admins */}
-        {isSystemAdmin && (
+        {isSystemAdmin && !isGuest && (
           <div className="p-4 border-b border-brand-slate/30">
             <UploadButton />
           </div>
         )}
 
-        {/* User Profile Section */}
-        {user && (
+        {/* User Profile Section - Hidden for Guests */}
+        {user && !isGuest && (
           <div className="p-2">
             <Link href="/settings" className="w-full flex items-center gap-3 px-3 py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
               {/* Profile Picture */}
@@ -223,11 +250,48 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-brand-cream truncate">{user.name}</p>
-                <p className="text-xs font-bold uppercase tracking-wide text-sky-400">
-                  {isSystemAdmin ? 'Admin' : 'User'}
-                </p>
+                {/* Role Label - Priority: Admin > Student > Lecturer */}
+                {isSystemAdmin ? (
+                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                    Admin
+                  </p>
+                ) : user.activeRole === 'student' ? (
+                  <p className="text-xs font-bold tracking-wide text-emerald-400">
+                    Student
+                  </p>
+                ) : user.activeRole === 'lecturer' ? (
+                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                    Lecturer
+                  </p>
+                ) : null}
               </div>
             </Link>
+          </div>
+        )}
+        
+        {/* Guest Mode Profile Section - Same Design as Authenticated */}
+        {isGuest && user && (
+          <div className="p-2">
+            <div className="w-full flex items-center gap-3 px-3 py-3 rounded-lg">
+              {/* Profile Picture */}
+              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <span className="text-white font-semibold text-sm">G</span>
+              </div>
+              
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-brand-cream truncate">Guest User</p>
+                {user.role === 'user' ? (
+                  <p className="text-xs font-bold tracking-wide text-emerald-400">
+                    Student
+                  </p>
+                ) : (
+                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                    Lecturer
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

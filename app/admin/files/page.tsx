@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiTrash2, FiFileText, FiCloud, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiTrash2, FiFileText, FiCloud, FiArrowLeft, FiCheck, FiEdit2, FiX } from 'react-icons/fi';
 
 export default function AdminFilesPage() {
   const [files, setFiles] = useState([]);
@@ -10,6 +10,8 @@ export default function AdminFilesPage() {
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingAudience, setEditingAudience] = useState<'student' | 'lecturer' | 'everyone' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -38,6 +40,13 @@ export default function AdminFilesPage() {
     };
 
     checkAuthorization();
+
+    // Listen for file upload events
+    const handleFilesUpdated = () => {
+      loadFiles();
+    };
+    window.addEventListener('filesUpdated', handleFilesUpdated);
+    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
   }, [router]);
 
   const loadFiles = async () => {
@@ -48,19 +57,31 @@ export default function AdminFilesPage() {
       setError('');
       
       const token = localStorage.getItem('token');
+      console.log('🔄 [FRONTEND]: Loading files...');
+      
       const res = await fetch('/api/admin/files', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       
+      console.log(`📥 [FRONTEND]: API Response Status: ${res.status}`);
+      
       if (!res.ok) {
         const errorData = await res.json();
+        console.error('❌ [FRONTEND]: API Error Response:', errorData);
         throw new Error(errorData.error || 'Failed to fetch data');
       }
       
       const data = await res.json();
-      console.log('📥 Admin Files Response:', data);
+      console.log('📥 [FRONTEND]: Files Response:', data);
+      console.log(`📊 [FRONTEND]: Retrieved ${data.length || 0} files`);
+      
+      if (data.length > 0) {
+        console.log('📋 [FRONTEND]: Sample file structure:', data[0]);
+      }
+      
       setFiles(Array.isArray(data) ? data : (data.files || []));
     } catch (err: any) {
+      console.error('❌ [FRONTEND]: Error loading files:', err);
       setError(err.message);
       setFiles([]);
     } finally {
@@ -97,6 +118,89 @@ export default function AdminFilesPage() {
       alert(`Error deleting file: ${err.message}`);
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleEditAudience = async (fileId: string, newAudience: 'student' | 'lecturer' | 'everyone') => {
+    try {
+      console.log(`🔄 [FRONTEND]: Updating audience for file ${fileId} to ${newAudience}`);
+      
+      const token = localStorage.getItem('token');
+      const requestBody = { audience: newAudience };
+      console.log('📤 [FRONTEND]: Request body:', requestBody);
+      
+      const res = await fetch(`/api/admin/files/${fileId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const responseData = await res.json();
+      console.log('📥 [FRONTEND]: API Response:', responseData);
+      console.log('🎯 [FRONTEND]: Response audience field:', responseData.audience);
+
+      if (!res.ok) {
+        throw new Error(responseData.error || 'Failed to update audience');
+      }
+
+      const finalAudience = responseData.audience || newAudience;
+      console.log(`✅ [FRONTEND]: Using audience: ${finalAudience}`);
+
+      // Update the file in local state with the response audience
+      setFiles(prevFiles =>
+        prevFiles.map(file =>
+          file._id === fileId ? { ...file, audience: finalAudience } : file
+        )
+      );
+
+      setEditingId(null);
+      setEditingAudience(null);
+      alert('Audience updated successfully!');
+    } catch (err: any) {
+      console.error('❌ [FRONTEND]: Error updating audience:', err);
+      alert(`Error updating audience: ${err.message}`);
+    }
+  };
+
+  const getAudienceBadge = (audience: string) => {
+    switch (audience) {
+      case 'student':
+        return { label: '👨‍🎓 Students', bgColor: 'bg-emerald-500/20', borderColor: 'border-emerald-500/50', textColor: 'text-emerald-400' };
+      case 'lecturer':
+        return { label: '👨‍🏫 Lecturers', bgColor: 'bg-sky-500/20', borderColor: 'border-sky-500/50', textColor: 'text-sky-400' };
+      default:
+        return { label: '🌍 Everyone', bgColor: 'bg-slate-500/20', borderColor: 'border-slate-500/50', textColor: 'text-slate-400' };
+    }
+  };
+
+  const handleMigration = async () => {
+    if (!window.confirm('This will set audience to "Everyone" for all files without an audience. Continue?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/migrate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Migration failed');
+      }
+
+      const data = await res.json();
+      alert(`Migration completed! Updated ${data.modifiedCount} documents.`);
+      loadFiles();
+    } catch (err: any) {
+      alert(`Migration error: ${err.message}`);
     }
   };
 
@@ -228,38 +332,89 @@ export default function AdminFilesPage() {
                 <thead className="bg-brand-slate/50 border-b border-brand-slate/30">
                   <tr>
                     <th className="text-left py-4 px-6 text-brand-light font-semibold">File Name</th>
+                    <th className="text-left py-4 px-6 text-brand-light font-semibold">Audience</th>
                     <th className="text-left py-4 px-6 text-brand-light font-semibold">Uploaded</th>
                     <th className="text-right py-4 px-6 text-brand-light font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-slate/30">
-                  {files.map((file: any) => (
-                    <tr key={file._id} className="hover:bg-brand-slate/20 transition-colors duration-200">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <FiFileText className="w-5 h-5 text-brand-accent flex-shrink-0" />
-                          <span className="text-brand-cream font-medium">{file.name || file.fileName || 'Unnamed'}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-brand-light/70 text-sm">
-                        {file.uploadDate 
-                          ? new Date(file.uploadDate).toLocaleDateString() 
-                          : (file.createdAt 
-                            ? new Date(file.createdAt).toLocaleDateString() 
-                            : 'N/A')}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => handleDeleteFile(file._id)}
-                          disabled={deleting === file._id}
-                          className="flex items-center gap-2 ml-auto bg-red-500/20 hover:bg-red-500/40 disabled:bg-brand-slate/50 text-red-400 hover:text-red-300 disabled:text-brand-light/50 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/60"
-                        >
-                          <FiTrash2 size={16} />
-                          {deleting === file._id ? 'Deleting...' : 'Delete'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {files.map((file: any) => {
+                    const badge = getAudienceBadge(file.audience || 'everyone');
+                    const isEditing = editingId === file._id;
+                    
+                    return (
+                      <tr key={file._id} className="hover:bg-brand-slate/20 transition-colors duration-200">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <FiFileText className="w-5 h-5 text-brand-accent flex-shrink-0" />
+                            <span className="text-brand-cream font-medium">{file.name || file.fileName || 'Unnamed'}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {isEditing ? (
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={editingAudience || file.audience || 'everyone'}
+                                onChange={(e) => setEditingAudience(e.target.value as any)}
+                                className="bg-brand-dark/50 border border-brand-slate/50 rounded px-2 py-1 text-sm text-brand-cream focus:outline-none focus:border-brand-accent"
+                              >
+                                <option value="student">👨‍🎓 Students</option>
+                                <option value="lecturer">👨‍🏫 Lecturers</option>
+                                <option value="everyone">🌍 Everyone</option>
+                              </select>
+                              <button
+                                onClick={() => handleEditAudience(file._id, editingAudience || (file.audience as any) || 'everyone')}
+                                className="text-green-400 hover:text-green-300"
+                              >
+                                <FiCheck size={18} />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingId(null);
+                                  setEditingAudience(null);
+                                }}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                <FiX size={18} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className={`px-3 py-1 rounded-lg border ${badge.bgColor} ${badge.borderColor} text-xs font-semibold ${badge.textColor}`}>
+                                {badge.label}
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setEditingId(file._id);
+                                  setEditingAudience(file.audience || 'everyone');
+                                }}
+                                className="p-1 text-brand-light/60 hover:text-brand-accent transition-colors"
+                              >
+                                <FiEdit2 size={16} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-brand-light/70 text-sm">
+                          {file.uploadDate 
+                            ? new Date(file.uploadDate).toLocaleDateString() 
+                            : (file.createdAt 
+                              ? new Date(file.createdAt).toLocaleDateString() 
+                              : 'N/A')}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => handleDeleteFile(file._id)}
+                            disabled={deleting === file._id}
+                            className="flex items-center gap-2 ml-auto bg-red-500/20 hover:bg-red-500/40 disabled:bg-brand-slate/50 text-red-400 hover:text-red-300 disabled:text-brand-light/50 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/60"
+                          >
+                            <FiTrash2 size={16} />
+                            {deleting === file._id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

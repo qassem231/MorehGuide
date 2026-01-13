@@ -37,6 +37,7 @@ export default function LoginForm() {
       console.log('💾 [LOGIN FORM]: Saving JWT token to localStorage');
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.removeItem('guestMode'); // Clear guest mode if switching to login
 
       // Verify the token was actually saved
       const savedToken = localStorage.getItem('token');
@@ -49,17 +50,20 @@ export default function LoginForm() {
       // Give a tiny delay to ensure localStorage is committed before redirect
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      console.log('✅ [LOGIN FORM]: Login successful, refreshing server state');
-      router.refresh();
-
-      console.log('✅ [LOGIN FORM]: Redirecting to /chat');
-      router.push('/chat');
+      console.log('✅ [LOGIN FORM]: Login successful, redirecting to /role-selection');
+      router.push('/role-selection');
     } catch (error: any) {
       console.error('❌ [LOGIN FORM]: Login error:', error);
       setError(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleContinueAsGuest = () => {
+    console.log('👤 [LOGIN FORM]: Continue as guest clicked');
+    localStorage.setItem('guestMode', 'true');
+    router.push('/role-selection?guest=true');
   };
 
   return (
@@ -109,6 +113,24 @@ export default function LoginForm() {
         >
           Sign in
         </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-brand-slate/30"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-brand-slate/50 text-brand-light/60">Or</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleContinueAsGuest}
+          disabled={isLoading}
+          className="w-full py-3 px-4 bg-brand-slate/50 hover:bg-brand-slate/70 text-brand-cream font-semibold rounded-lg transition-all duration-200 border border-brand-slate/50 hover:border-brand-slate/70 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Continue as Guest
+        </button>
       </form>
       <p className="text-center text-sm text-brand-light">
         Don't have an account?{' '}

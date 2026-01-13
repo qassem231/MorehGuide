@@ -1,14 +1,45 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FiBookOpen, FiUserCheck } from 'react-icons/fi';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isGuest = searchParams.get('guest') === 'true';
+  
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Server-side-like check: verify auth status before rendering UI
+  useEffect(() => {
+    console.log('🔐 [ROLE SELECTION]: Checking authentication status...');
+    setIsCheckingAuth(true);
+
+    try {
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const isAdmin = user.email === 'admin@admin.com' || user.isAdmin === true;
+        
+        if (isAdmin) {
+          console.log('✅ [ROLE SELECTION]: Admin user detected, redirecting to /chat');
+          router.push('/chat');
+          return;
+        }
+      }
+      
+      console.log('✅ [ROLE SELECTION]: User is not admin, showing role selection');
+      setIsCheckingAuth(false);
+    } catch (error) {
+      console.error('❌ [ROLE SELECTION]: Error checking admin status:', error);
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
 
   const handleRoleSelect = async (role: 'student' | 'lecturer') => {
     setIsLoading(true);
@@ -16,51 +47,70 @@ export default function RoleSelectionPage() {
     setSelectedRole(role);
 
     try {
+      // If guest mode, just store role locally
+      if (isGuest) {
+        console.log(`👤 [GUEST MODE]: Setting guest role to: ${role}`);
+        localStorage.setItem('guestMode', 'true');
+        localStorage.setItem('guestRole', role);
+        
+        // Create a guest user object
+        const guestUser = {
+          id: 'guest-' + Date.now(),
+          name: 'Guest User',
+          email: 'guest@moreguide.local',
+          role: role === 'student' ? 'user' : 'admin',
+          isGuest: true,
+          isAdmin: false,
+        };
+        
+        localStorage.setItem('user', JSON.stringify(guestUser));
+        console.log('✅ Guest user stored in localStorage');
+
+        // Dispatch event
+        window.dispatchEvent(new Event('authStateChanged'));
+        window.dispatchEvent(new Event('userDataUpdated'));
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+        console.log('✅ Redirecting to /chat');
+        router.push('/chat');
+        return;
+      }
+
+      // Regular authenticated role selection
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      console.log(`🔄 Starting role update for: ${role}`);
+      console.log(`🔄 Starting role selection for: ${role}`);
 
-      // Step 1: Update role in database
-      const res = await fetch('/api/user/update-role', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role }),
-      });
+      // Simulate update({ activeRole: ... }) for session-only storage
+      // This uses await pattern but stores only in localStorage (not MongoDB)
+      const activeRole = role === 'student' ? 'student' : 'lecturer';
+      
+      // Store activeRole in localStorage (session-based, not persisted to DB)
+      localStorage.setItem('activeRole', activeRole);
+      console.log(`✅ Active role stored in localStorage: ${activeRole}`);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to update role');
+      // Also update user data to include activeRole
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.activeRole = activeRole;
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('✅ User object updated with activeRole');
       }
 
-      const data = await res.json();
-      console.log('✅ Role updated in database:', data);
+      // Dispatch event
+      window.dispatchEvent(new Event('userDataUpdated'));
 
-      // Step 2: Update localStorage with the returned user data
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        console.log('✅ User stored in localStorage:', data.user);
-
-        // Dispatch custom event to notify components of user data change
-        window.dispatchEvent(new Event('userDataUpdated'));
-      }
-
-      // Step 3: Refresh the router to force server-side session re-read
-      console.log('🔄 Refreshing router to update server session...');
-      router.refresh();
-
-      // Step 4: Wait for refresh to complete and redirect
+      // Wait briefly and redirect
       await new Promise(resolve => setTimeout(resolve, 300));
       console.log('✅ Redirecting to /chat');
       router.push('/chat');
     } catch (err: any) {
-      console.error('❌ Error updating role:', err);
-      setError(err.message || 'Failed to update role');
+      console.error('❌ Error selecting role:', err);
+      setError(err.message || 'Failed to select role');
       setSelectedRole(null);
       setIsLoading(false);
     }
@@ -74,8 +124,19 @@ export default function RoleSelectionPage() {
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl">
+      {/* Loading State - prevents UI flicker while checking auth */}
+      {isCheckingAuth && (
+        <div className="relative z-20 text-center">
+          <div className="inline-block">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brand-accent"></div>
+            <p className="text-brand-cream text-sm mt-4">Loading...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Content - only render after auth check is complete */}
+      {!isCheckingAuth && (
+        <div className="relative z-10 w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-brand bg-clip-text text-transparent mb-4">
@@ -179,6 +240,7 @@ export default function RoleSelectionPage() {
           <p>You can change your role anytime in your account settings</p>
         </div>
       </div>
+      )}
     </div>
   );
 }

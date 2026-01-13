@@ -103,6 +103,9 @@ export async function POST(request: NextRequest) {
     let selectedDocId = 'NONE';
     let geminiFileUri = '';
 
+    // Get user's activeRole from token for future role-based filtering
+    console.log(`👤 [CHAT API]: User activeRole: ${user?.activeRole || 'none'}`);
+
     // STEP 1: Fetch lightweight knowledge base menu (IDs, filenames, metadata only)
     console.log('📋 [CHAT API]: Step 1 - Fetching knowledge base menu');
     const menu = await fetchKnowledgeBaseMenu();
@@ -111,6 +114,11 @@ export async function POST(request: NextRequest) {
     if (menu && menu.trim() !== '') {
       console.log('🔍 [CHAT API]: Step 2 - Selecting relevant document');
       selectedDocId = await selectRelevantDocument(message, menu);
+
+      // TODO: Filter vector search results where audience matches user.activeRole or is set to 'everyone'
+      // Example implementation:
+      // const allowedAudiences = [user?.activeRole, 'everyone'];
+      // filtered_docs = docs.filter(doc => allowedAudiences.includes(doc.audience));
 
       // STEP 3: If a document was selected, upload it to Gemini
       if (selectedDocId !== 'NONE' && selectedDocId.length > 0) {

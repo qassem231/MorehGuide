@@ -12,6 +12,7 @@ export interface IPdfDocument extends Document {
     category: string;
   };
   geminiUri?: string;
+  audience: 'student' | 'lecturer' | 'everyone';
   createdAt: Date;
 }
 
@@ -47,6 +48,11 @@ const PdfDocumentSchema = new Schema<IPdfDocument>(
     geminiUri: {
       type: String,
       default: null,
+    },
+    audience: {
+      type: String,
+      enum: ['student', 'lecturer', 'everyone'],
+      default: 'everyone',
     },
     createdAt: {
       type: Date,

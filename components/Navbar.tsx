@@ -2,15 +2,17 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { FiLogOut, FiMenu, FiX, FiSettings } from 'react-icons/fi';
+import { useRouter, usePathname } from 'next/navigation';
+import { FiLogOut, FiMenu, FiX, FiSettings, FiChevronDown } from 'react-icons/fi';
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Simple admin check: email match OR isAdmin flag
   const isSystemAdmin = user && (
@@ -23,12 +25,24 @@ export default function Navbar() {
     const checkUser = () => {
       const token = localStorage.getItem('token');
       const userData = localStorage.getItem('user');
+      const activeRole = localStorage.getItem('activeRole');
+      const guestMode = localStorage.getItem('guestMode') === 'true';
       console.log('👤 [NAVBAR]: Checking user - Token exists:', !!token);
+      console.log('👤 [NAVBAR]: Active role:', activeRole);
       console.log('👤 [NAVBAR]: User data from localStorage:', userData);
+      setIsGuest(guestMode);
       if (token && userData) {
         const parsedUser = JSON.parse(userData);
+        // Merge activeRole if it exists in localStorage
+        if (activeRole) {
+          parsedUser.activeRole = activeRole;
+        }
         console.log('👤 [NAVBAR]: Parsed user:', parsedUser);
         console.log('👤 [NAVBAR]: User role:', parsedUser.role);
+        console.log('👤 [NAVBAR]: User activeRole:', parsedUser.activeRole);
+        setUser(parsedUser);
+      } else if (guestMode && userData) {
+        const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
       } else {
         setUser(null);
@@ -51,8 +65,8 @@ export default function Navbar() {
 
     // Listen for storage changes (when role is updated in another component)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'user') {
-        console.log('🔄 [NAVBAR]: User storage changed, updating...');
+      if (e.key === 'user' || e.key === 'activeRole') {
+        console.log(`🔄 [NAVBAR]: Storage changed for key: ${e.key}, updating...`);
         checkUser();
       }
     };
@@ -84,7 +98,10 @@ export default function Navbar() {
     console.log('🔓 [NAVBAR]: Logout button clicked');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('guestMode');
+    localStorage.removeItem('guestRole');
     setUser(null);
+    setIsGuest(false);
     setIsDropdownOpen(false);
 
     // Dispatch event to notify other components
@@ -101,15 +118,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href={user ? "/chat" : "/"} className="flex items-center">
-            <span className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+          <Link href={user && !isGuest ? "/chat" : "/"} className="flex items-center">
+            <span className="text-2xl font-bold text-brand-accent hover:text-blue-300 transition-colors">
               MorehGuide
             </span>
           </Link>
 
           {/* Desktop Menu */}
           <div className="hidden sm:flex items-center space-x-6">
-            {user ? (
+            {user && !isGuest ? (
               <>
                 <div className="flex items-center space-x-4">
                   {isSystemAdmin && (
@@ -125,7 +142,7 @@ export default function Navbar() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center gap-2 hover:bg-brand-slate/50 px-3 py-2 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-2 hover:bg-brand-slate/50 px-3 py-2 rounded-lg transition-all duration-200 group"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center overflow-hidden">
                         {user.profilePicture ? (
@@ -138,8 +155,18 @@ export default function Navbar() {
                       </div>
                       <div className="text-right hidden sm:block">
                         <p className="text-xs text-brand-light/70 leading-none">{user.name}</p>
-                        <p className="text-xs text-sky-400 font-semibold leading-none" style={{textTransform: 'capitalize'}}>{user.role}</p>
+                        {/* Role Label - Priority: Admin > Student > Lecturer */}
+                        {user.email === 'admin@admin.com' || user.isAdmin === true ? (
+                          <p className="text-xs text-sky-400 font-semibold leading-none">Admin</p>
+                        ) : user.activeRole === 'student' ? (
+                          <p className="text-xs text-emerald-400 font-semibold leading-none">Student</p>
+                        ) : user.activeRole === 'lecturer' ? (
+                          <p className="text-xs text-sky-400 font-semibold leading-none">Lecturer</p>
+                        ) : (
+                          <p className="text-xs text-brand-light/50 font-semibold leading-none">User</p>
+                        )}
                       </div>
+                      <FiChevronDown className={`w-4 h-4 text-brand-light/60 group-hover:text-brand-light transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Dropdown Menu */}
@@ -165,7 +192,7 @@ export default function Navbar() {
                   </div>
                 </div>
               </>
-            ) : (
+            ) : (pathname !== '/login' && pathname !== '/register') ? (
               <>
                 <Link
                   href="/login"
@@ -180,7 +207,7 @@ export default function Navbar() {
                   Register
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -202,7 +229,7 @@ export default function Navbar() {
                 <div className="text-right mb-4 flex items-center gap-3 justify-end">
                   <div>
                     <p className="text-xs text-brand-light/70">{user.name}</p>
-                    <p className="text-xs text-sky-400 font-semibold" style={{textTransform: 'capitalize'}}>{user.role}</p>
+                    <p className="text-xs text-sky-400 font-semibold" style={{textTransform: 'capitalize'}}>{user.activeRole || user.role}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center overflow-hidden">
                     {user.profilePicture ? (

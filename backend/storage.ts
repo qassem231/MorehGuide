@@ -124,9 +124,10 @@ export async function extractMetadataFromFile(
 export async function savePdfDocumentToMongoDB(
   fileName: string,
   fileBuffer: Buffer,
-  metadata: { summary: string; keywords: string[]; category: string }
+  metadata: { summary: string; keywords: string[]; category: string },
+  audience: 'student' | 'lecturer' | 'everyone' = 'everyone'
 ): Promise<string> {
-  console.log(`🟢 [DB]: Saving PDF document to MongoDB...`);
+  console.log(`🟢 [DB]: Saving PDF document to MongoDB with audience: ${audience}...`);
   
   await connectToDatabase();
 
@@ -136,10 +137,11 @@ export async function savePdfDocumentToMongoDB(
       fileData: fileBuffer,
       contentType: 'application/pdf',
       metadata,
+      audience,
       createdAt: new Date(),
     });
 
-    console.log(`✅ [DB]: Document saved to MongoDB with ID: ${newDocument._id}`);
+    console.log(`✅ [DB]: Document saved to MongoDB with ID: ${newDocument._id} and audience: ${audience}`);
     return newDocument._id.toString();
   } catch (error) {
     console.error('Error saving document to MongoDB:', error);

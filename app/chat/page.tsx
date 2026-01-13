@@ -15,6 +15,7 @@ interface User {
 export default function Chat() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     {
@@ -29,12 +30,15 @@ export default function Chat() {
   useEffect(() => {
     console.log('🔐 [CHAT PAGE]: Checking authorization...');
 
-    // Check if token exists in localStorage
-    const token = localStorage.getItem('token');
+    // Check guest mode first
+    const guestMode = localStorage.getItem('guestMode') === 'true';
     const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    const activeRole = localStorage.getItem('activeRole');
 
-    if (!token) {
-      console.warn('⚠️ [CHAT PAGE]: No token found, redirecting to /login');
+    // Allow access if either: 1) has token or 2) is in guest mode
+    if (!token && !guestMode) {
+      console.warn('⚠️ [CHAT PAGE]: No token and not guest, redirecting to /login');
       router.push('/login');
       return;
     }
@@ -48,9 +52,16 @@ export default function Chat() {
     try {
       const parsedUser = JSON.parse(storedUser);
       console.log(`✅ [CHAT PAGE]: User authorized: ${parsedUser.email}`);
+      console.log(`👤 [CHAT PAGE]: Guest mode: ${guestMode}`);
       
-      // User has a valid token, authorize them
+      // Merge activeRole from localStorage if it exists
+      if (activeRole) {
+        parsedUser.activeRole = activeRole;
+        console.log(`✅ [CHAT PAGE]: activeRole merged: ${activeRole}`);
+      }
+      
       setUser(parsedUser);
+      setIsGuest(guestMode);
       setIsAuthorized(true);
     } catch (error) {
       console.error('❌ [CHAT PAGE]: Failed to parse user data:', error);
@@ -115,6 +126,7 @@ export default function Chat() {
             currentChatId={currentChatId}
             onChatSelect={handleChatSelect}
             refreshTrigger={refreshTrigger}
+            isGuest={isGuest}
           />
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ChatArea 
@@ -124,6 +136,7 @@ export default function Chat() {
               setMessages={setMessages}
               onChatIdChange={handleChatIdChange}
               onNewChatCreated={handleNewChatCreated}
+              isGuest={isGuest}
             />
           </div>
         </>
