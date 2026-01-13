@@ -48,28 +48,9 @@ export default function RegisterForm() {
 
       console.log('✅ [REGISTER FORM]: Registration successful');
       
-      // Auto-login after successful registration
-      if (data.token) {
-        console.log('💾 [REGISTER FORM]: Auto-logging in with received token');
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Dispatch auth state change event
-        const authChangeEvent = new Event('authStateChanged');
-        window.dispatchEvent(authChangeEvent);
-
-        // Give a tiny delay to ensure localStorage is committed
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        console.log('✅ [REGISTER FORM]: Refreshing server state');
-        router.refresh();
-
-        console.log('✅ [REGISTER FORM]: Redirecting to /chat');
-        router.push('/chat');
-      } else {
-        // If no token returned, redirect to login
-        router.push('/login');
-      }
+      // Redirect to login page - user must log in
+      console.log('📍 [REGISTER FORM]: Redirecting to /login for user to log in');
+      router.push('/login');
     } catch (error: any) {
       console.error('❌ [REGISTER FORM]: Registration error:', error);
       setError(error.message || 'Registration failed');

@@ -60,27 +60,11 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ [REGISTER API]: User created successfully with ID: ${newUser._id}`);
 
-    // Sign JWT token
-    const token = await signToken({
-      userId: newUser._id.toString(),
-      email: newUser.email,
-      role: newUser.role,
-      isAdmin: newUser.isAdmin || false,
-    });
-
+    // Return success response WITHOUT token - user must login separately
     return NextResponse.json(
       {
         success: true,
-        message: 'User registered successfully',
-        token,
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          isAdmin: newUser.isAdmin || false,
-          role: 'user',
-          profilePicture: '',
-        },
+        message: 'User registered successfully. Please log in to continue.',
       },
       { status: 201 }
     );
