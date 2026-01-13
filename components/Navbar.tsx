@@ -171,8 +171,10 @@ export default function Navbar({}: NavbarProps = {}) {
                   </div>
                   <div className="text-right hidden sm:block">
                     <p className="text-xs text-brand-light/70 leading-none">{user.name}</p>
-                    {/* Role Label - Priority: Admin > Student > Lecturer */}
-                    {user.email === 'admin@admin.com' || user.isAdmin === true ? (
+                    {/* Role Label - Priority: Admin > Student > Lecturer > Guest */}
+                    {isGuest ? (
+                      <p className="text-xs text-amber-400 font-semibold leading-none">Guest</p>
+                    ) : user.email === 'admin@admin.com' || user.isAdmin === true ? (
                       <p className="text-xs text-sky-400 font-semibold leading-none">Admin</p>
                     ) : user.activeRole === 'student' ? (
                       <p className="text-xs text-emerald-400 font-semibold leading-none">Student</p>
@@ -191,7 +193,9 @@ export default function Navbar({}: NavbarProps = {}) {
                     {/* Mobile: Show user info in dropdown */}
                     <div className="sm:hidden px-3 py-2 border-b border-brand-slate/30 text-xs text-brand-light/70">
                       <p className="font-semibold text-brand-cream">{user.name}</p>
-                      <p className="text-sky-400 font-semibold" style={{textTransform: 'capitalize'}}>{user.activeRole || user.role}</p>
+                      <p className="text-sky-400 font-semibold" style={{textTransform: 'capitalize'}}>
+                        {isGuest ? 'Guest' : (user.activeRole || user.role)}
+                      </p>
                     </div>
                     
                     {/* Admin link for mobile */}
