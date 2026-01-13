@@ -97,6 +97,11 @@ export default function Navbar({}: NavbarProps = {}) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Hide navbar on login/register pages
+  if (pathname === '/login' || pathname === '/register') {
+    return null;
+  }
+
   const handleLogout = async () => {
     console.log('🔓 [NAVBAR]: Logout button clicked');
     localStorage.removeItem('token');
