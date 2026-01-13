@@ -34,6 +34,7 @@ async function getUserFromRequest(request: NextRequest) {
 /**
  * GET /api/chats
  * Returns all chats for the current user with chatId and title (for sidebar).
+ * Guests cannot have persistent chats, so returns empty list.
  */
 export async function GET(request: NextRequest) {
   console.log('📥 [CHATS API]: Received Get All Chats Request (GET)');
@@ -41,7 +42,8 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('⚠️ [CHATS API]: Guest user requesting chats - returning empty list');
+      return NextResponse.json({ chats: [] });
     }
 
     await connectToDatabase();
@@ -73,6 +75,7 @@ export async function GET(request: NextRequest) {
  * Body: { chatId?: string, message: string, isFirstMessage?: boolean }
  * - If chatId is not provided, creates a new chat with auto-generated ID
  * - If isFirstMessage is true, generates title from the message
+ * Note: Guests cannot create persistent chats, so returns empty response
  */
 export async function POST(request: NextRequest) {
   console.log('📨 [CHATS API]: Received Create/Update Chat Request (POST)');
@@ -80,7 +83,9 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('👥 [CHATS API]: Guest user - skipping chat creation');
+      // Guests can't create chats, return empty chatId
+      return NextResponse.json({ chatId: '', isNewChat: false });
     }
 
     const { chatId: providedChatId, message, isFirstMessage } = await request.json();

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/chat/Sidebar';
 import ChatArea from '@/components/chat/ChatArea';
+import { useMobileSidebar } from '@/lib/MobileSidebarContext';
 
 interface User {
   id: string;
@@ -17,7 +18,6 @@ export default function Chat() {
   const [user, setUser] = useState<User | null>(null);
   const [isGuest, setIsGuest] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     {
       role: 'assistant',
@@ -27,6 +27,7 @@ export default function Chat() {
   ]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useMobileSidebar();
 
   useEffect(() => {
     console.log('🔐 [CHAT PAGE]: Checking authorization...');
@@ -133,16 +134,16 @@ export default function Chat() {
             />
           </div>
 
-          {/* Mobile Sidebar Overlay */}
+          {/* Mobile Sidebar Overlay - Only on small screens */}
           {isMobileSidebarOpen && (
-            <div className="fixed inset-0 z-40 md:hidden">
+            <>
               {/* Backdrop */}
               <div
-                className="absolute inset-0 bg-black/50"
+                className="fixed inset-0 bg-black/50 z-30 md:hidden"
                 onClick={() => setIsMobileSidebarOpen(false)}
               ></div>
               {/* Sidebar */}
-              <div className="absolute left-0 top-0 bottom-0 w-64 bg-brand-slate border-r border-brand-slate/30 overflow-y-auto z-50">
+              <div className="fixed left-0 top-16 bottom-0 w-64 bg-brand-slate border-r border-brand-slate/30 overflow-y-auto z-40 md:hidden shadow-xl">
                 <Sidebar
                   userRole={user?.role || null}
                   currentChatId={currentChatId}
@@ -154,7 +155,7 @@ export default function Chat() {
                   isGuest={isGuest}
                 />
               </div>
-            </div>
+            </>
           )}
 
           {/* Chat Area */}

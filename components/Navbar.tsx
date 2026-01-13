@@ -4,21 +4,19 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FiLogOut, FiMenu, FiX, FiSettings, FiChevronDown } from 'react-icons/fi';
+import { useMobileSidebar } from '@/lib/MobileSidebarContext';
 
-interface NavbarProps {
-  onMobileSidebarToggle?: (isOpen: boolean) => void;
-  isMobileSidebarOpen?: boolean;
-}
+interface NavbarProps {}
 
-export default function Navbar({ onMobileSidebarToggle, isMobileSidebarOpen = false }: NavbarProps = {}) {
+export default function Navbar({}: NavbarProps = {}) {
   const [user, setUser] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobileSidebarOpen_local, setIsMobileSidebarOpen_local] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const { isMobileSidebarOpen, toggleMobileSidebar } = useMobileSidebar();
 
   // Simple admin check: email match OR isAdmin flag
   const isSystemAdmin = user && (
@@ -87,11 +85,6 @@ export default function Navbar({ onMobileSidebarToggle, isMobileSidebarOpen = fa
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-
-  // Handle mobile sidebar toggle callback
-  useEffect(() => {
-    onMobileSidebarToggle?.(isMobileSidebarOpen_local);
-  }, [isMobileSidebarOpen_local, onMobileSidebarToggle]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -227,10 +220,10 @@ export default function Navbar({ onMobileSidebarToggle, isMobileSidebarOpen = fa
             {pathname === '/chat' && (
               <button
                 className="text-brand-cream hover:text-brand-accent transition-colors p-2"
-                onClick={() => setIsMobileSidebarOpen_local(!isMobileSidebarOpen_local)}
+                onClick={toggleMobileSidebar}
                 aria-label="Toggle sidebar"
               >
-                {isMobileSidebarOpen_local ? <FiX size={24} /> : <FiMenu size={24} />}
+                {isMobileSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
               </button>
             )}
             

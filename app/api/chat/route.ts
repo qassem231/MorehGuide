@@ -43,14 +43,17 @@ async function getUserFromRequest(request: NextRequest) {
  * GET /api/chat
  * Returns the chat messages for a specific chatId.
  * Query params: ?chatId=<id> (optional - if provided, fetch from Chat collection; otherwise use legacy ChatHistory)
+ * Note: Guests cannot retrieve chat history (no user ID to query)
  */
 export async function GET(request: NextRequest) {
   console.log('📥 [CHAT API]: Received Chat History Request (GET)');
 
   try {
     const user = await getUserFromRequest(request);
+    // Guests cannot retrieve chat history (no persistent storage)
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('⚠️ [CHAT API]: GET request without authentication (guest mode) - returning empty history');
+      return NextResponse.json({ messages: [] });
     }
 
     const { searchParams } = new URL(request.url);
@@ -82,14 +85,16 @@ export async function GET(request: NextRequest) {
  * POST /api/chat
  * Generates an answer (same as before), then appends user + assistant messages.
  * If chatId is provided in body, saves to Chat collection; otherwise to ChatHistory (legacy).
+ * Note: Guests can chat but their messages are not persisted
  */
 export async function POST(request: NextRequest) {
   console.log('📨 [CHAT API]: Received Chat Request (POST)');
 
   try {
     const user = await getUserFromRequest(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const isGuest = !user;
+    if (isGuest) {
+      console.log('👥 [CHAT API]: Guest user making chat request (no persistence)');
     }
 
     const { message, chatId } = await request.json();
@@ -103,8 +108,8 @@ export async function POST(request: NextRequest) {
     let selectedDocId = 'NONE';
     let geminiFileUri = '';
 
-    // Get user's activeRole from token for future role-based filtering
-    console.log(`👤 [CHAT API]: User activeRole: ${user?.activeRole || 'none'}`);
+    // Get user's activeRole from token for future role-based filtering (guests have no role)
+    console.log(`👤 [CHAT API]: User activeRole: ${user?.activeRole || 'guest'}`);
 
     // STEP 1: Fetch lightweight knowledge base menu (IDs, filenames, metadata only)
     console.log('📋 [CHAT API]: Step 1 - Fetching knowledge base menu');
@@ -153,40 +158,44 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [CHAT API]: Response generated successfully');
 
-    // STEP 5: Persist chat history (append assistant message to the appropriate collection)
-    await connectToDatabase();
+    // STEP 5: Persist chat history (skip for guests)
+    if (!isGuest) {
+      await connectToDatabase();
 
-    const assistantMsg = { role: 'assistant' as const, content: String(finalResponse), createdAt: new Date() };
+      const assistantMsg = { role: 'assistant' as const, content: String(finalResponse), createdAt: new Date() };
 
-    if (chatId) {
-      // Save to new Chat collection
-      await Chat.findOneAndUpdate(
-        { chatId, userId: user.userId },
-        {
-          $push: {
-            messages: assistantMsg,
-          },
-        },
-        { new: true }
-      );
-    } else {
-      // Keep history from growing forever (last 200 messages)
-      // Save to legacy ChatHistory collection
-      const now = new Date();
-      const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
-
-      await ChatHistory.findOneAndUpdate(
-        { userId: user.userId },
-        {
-          $push: {
-            messages: {
-              $each: [userMsg, assistantMsg],
-              $slice: -200,
+      if (chatId) {
+        // Save to new Chat collection
+        await Chat.findOneAndUpdate(
+          { chatId, userId: user.userId },
+          {
+            $push: {
+              messages: assistantMsg,
             },
           },
-        },
-        { upsert: true, new: true }
-      );
+          { new: true }
+        );
+      } else {
+        // Keep history from growing forever (last 200 messages)
+        // Save to legacy ChatHistory collection
+        const now = new Date();
+        const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
+
+        await ChatHistory.findOneAndUpdate(
+          { userId: user.userId },
+          {
+            $push: {
+              messages: {
+                $each: [userMsg, assistantMsg],
+                $slice: -200,
+              },
+            },
+          },
+          { upsert: true, new: true }
+        );
+      }
+    } else {
+      console.log('👥 [CHAT API]: Guest user - skipping chat persistence');
     }
 
     return NextResponse.json({
