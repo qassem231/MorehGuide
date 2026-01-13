@@ -179,70 +179,70 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
       {/* Middle Section - Recent Chats (Scrollable Only) - Hidden for Guests */}
       {!isGuest ? (
         <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 p-1 border-b border-brand-slate/30">
-          <p className="text-xs text-brand-light/70 font-semibold px-3 py-2 uppercase tracking-wider">
+          <p className="text-xs text-brand-light/70 font-semibold px-2 sm:px-3 py-2 uppercase tracking-wider">
             Recent Chats
           </p>
           <div className="space-y-1">
             {isLoading ? (
-              <p className="text-xs text-brand-light/50 px-3 py-2">Loading chats...</p>
+              <p className="text-xs text-brand-light/50 px-2 sm:px-3 py-2">Loading chats...</p>
             ) : chats.length === 0 ? (
-              <p className="text-xs text-brand-light/50 px-3 py-2">No chats yet</p>
+              <p className="text-xs text-brand-light/50 px-2 sm:px-3 py-2">No chats yet</p>
             ) : (
               chats.map((chat) => (
                 <div
                   key={chat._id}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group ${
+                  className={`flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${
                     currentChatId === chat.chatId
                       ? 'bg-brand-slate/80 border-l-2 border-brand-accent'
                       : 'hover:bg-brand-slate/50'
                 }`}
-              >
-                <button
-                  onClick={() => handleChatSelect(chat.chatId)}
-                  className="flex-1 flex items-center gap-2 text-left truncate"
                 >
-                  <FiMessageSquare className="w-4 h-4 text-brand-light/60 group-hover:text-brand-accent shrink-0" />
-                  <span className="text-sm text-brand-cream/80 group-hover:text-brand-cream truncate">
-                    {chat.title}
-                  </span>
-                </button>
-                <button
-                  onClick={(e) => handleDeleteChat(e, chat._id)}
-                  className="p-1.5 rounded hover:bg-red-500/20 text-brand-light/60 hover:text-red-400 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100"
-                  title="Delete chat"
-                  aria-label="Delete chat"
-                >
-                  <FiTrash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))
-          )}
+                  <button
+                    onClick={() => handleChatSelect(chat.chatId)}
+                    className="flex-1 flex items-center gap-2 text-left truncate min-w-0"
+                  >
+                    <FiMessageSquare className="w-4 h-4 text-brand-light/60 group-hover:text-brand-accent shrink-0" />
+                    <span className="text-xs sm:text-sm text-brand-cream/80 group-hover:text-brand-cream truncate">
+                      {chat.title}
+                    </span>
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteChat(e, chat._id)}
+                    className="p-1.5 rounded hover:bg-red-500/20 text-brand-light/60 hover:text-red-400 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100 shrink-0"
+                    title="Delete chat"
+                    aria-label="Delete chat"
+                  >
+                    <FiTrash2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center border-b border-brand-slate/30">
-          <p className="text-xs text-brand-light/50 text-center">Guest mode: No chat history</p>
+          <p className="text-xs text-brand-light/50 text-center px-2">Guest mode: No chat history</p>
         </div>
       )}
 
       {/* Bottom Section - Upload & Profile (Always Visible) */}
       <div className="shrink-0 flex flex-col">
         {isSystemAdmin && !isGuest && (
-          <div className="p-4 border-b border-brand-slate/30">
+          <div className="p-2 sm:p-4 border-b border-brand-slate/30">
             <UploadButton />
           </div>
         )}
 
         {/* User Profile Section - Hidden for Guests */}
         {user && !isGuest && (
-          <div className="p-2">
-            <Link href="/settings" className="w-full flex items-center gap-3 px-3 py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
+          <div className="p-1 sm:p-2">
+            <Link href="/settings" className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
               {/* Profile Picture */}
-              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
                 {user.profilePicture ? (
                   <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-white font-semibold text-sm">
+                  <span className="text-white font-semibold text-xs sm:text-sm">
                     {user.name?.charAt(0).toUpperCase() || '?'}
                   </span>
                 )}
@@ -250,7 +250,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
               
               {/* User Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-brand-cream truncate">{user.name}</p>
+                <p className="text-xs sm:text-sm font-semibold text-brand-cream truncate">{user.name}</p>
                 {/* Role Label - Priority: Admin > Student > Lecturer */}
                 {isSystemAdmin ? (
                   <p className="text-xs font-bold tracking-wide text-sky-400">
@@ -272,16 +272,16 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
         
         {/* Guest Mode Profile Section - Same Design as Authenticated */}
         {isGuest && user && (
-          <div className="p-2">
-            <div className="w-full flex items-center gap-3 px-3 py-3 rounded-lg">
+          <div className="p-1 sm:p-2">
+            <div className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 rounded-lg">
               {/* Profile Picture */}
-              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
-                <span className="text-white font-semibold text-sm">G</span>
+              <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
+                <span className="text-white font-semibold text-xs sm:text-sm">G</span>
               </div>
               
               {/* User Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-brand-cream truncate">Guest User</p>
+                <p className="text-xs sm:text-sm font-semibold text-brand-cream truncate">Guest User</p>
                 {user.role === 'user' ? (
                   <p className="text-xs font-bold tracking-wide text-emerald-400">
                     Student
