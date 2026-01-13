@@ -139,7 +139,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
   };
 
   return (
-    <div className="w-64 h-screen bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30 overflow-hidden">
+    <div className="w-64 h-full bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30 overflow-hidden">
       {/* Top Section - Logo & New Chat Button */}
       <div className="flex-shrink-0 border-b border-brand-slate/30 flex flex-col gap-2 p-2">
         <div className="text-center">
@@ -223,7 +223,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-brand-cream truncate">{user.name}</p>
-                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">
+                <p className="text-xs font-bold uppercase tracking-wide text-sky-400">
                   {isSystemAdmin ? 'Admin' : 'User'}
                 </p>
               </div>

@@ -97,7 +97,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-brand-dark border-b border-brand-slate/30 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+    <nav className="bg-brand-dark border-b border-brand-slate/30 backdrop-blur-sm z-10 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -138,7 +138,7 @@ export default function Navbar() {
                       </div>
                       <div className="text-right hidden sm:block">
                         <p className="text-xs text-brand-light/70 leading-none">{user.name}</p>
-                        <p className="text-xs text-emerald-400 font-semibold leading-none" style={{textTransform: 'capitalize'}}>{user.role}</p>
+                        <p className="text-xs text-sky-400 font-semibold leading-none" style={{textTransform: 'capitalize'}}>{user.role}</p>
                       </div>
                     </button>
 
@@ -202,7 +202,7 @@ export default function Navbar() {
                 <div className="text-right mb-4 flex items-center gap-3 justify-end">
                   <div>
                     <p className="text-xs text-brand-light/70">{user.name}</p>
-                    <p className="text-xs text-emerald-400 font-semibold" style={{textTransform: 'capitalize'}}>{user.role}</p>
+                    <p className="text-xs text-sky-400 font-semibold" style={{textTransform: 'capitalize'}}>{user.role}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center overflow-hidden">
                     {user.profilePicture ? (

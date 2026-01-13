@@ -166,9 +166,9 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-brand-dark relative">
-      {/* Top Bar */}
-      <div className="flex-shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm">
-        {/* Optional header content can go here */}
+      {/* Top Bar with Header */}
+      <div className="flex-shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm flex items-center px-6">
+        <span className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</span>
       </div>
 
       {/* Scrollable Messages Area */}
