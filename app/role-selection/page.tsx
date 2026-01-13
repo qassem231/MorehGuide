@@ -144,9 +144,6 @@ function RoleSelectionContent() {
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-brand bg-clip-text text-transparent mb-4">
             Welcome to MorehGuide
           </h1>
-          <p className="text-xl text-brand-light/70 max-w-2xl mx-auto">
-            Tell us who you are so we can personalize your experience
-          </p>
         </div>
 
         {/* Role Cards */}
