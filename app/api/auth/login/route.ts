@@ -54,11 +54,12 @@ export async function POST(request: NextRequest) {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
+      isAdmin: user.isAdmin || false,
     });
 
     console.log(`✅ [LOGIN API]: Login successful for user: ${email}`);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: 'Login successful',
@@ -67,11 +68,16 @@ export async function POST(request: NextRequest) {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          isAdmin: user.isAdmin || false,
+          role: user.role || 'user',
+          profilePicture: user.profilePicture || '',
         },
       },
       { status: 200 }
     );
+    response.cookies.set('token', token, { httpOnly: true });
+    response.cookies.set('role', user.role, { httpOnly: true });
+    return response;
   } catch (error) {
     console.error('❌ [LOGIN API]: Login error:', error);
 

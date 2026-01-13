@@ -6,7 +6,9 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'pending' | 'student' | 'lecturer';
+  isAdmin: boolean;
+  profilePicture?: string;
   createdAt: Date;
 }
 
@@ -35,10 +37,18 @@ const UserSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: {
-        values: ['user', 'admin'],
-        message: 'Role must be either user or admin',
+        values: ['user', 'admin', 'pending', 'student', 'lecturer'],
+        message: 'Role must be either user, admin, pending, student, or lecturer',
       },
-      default: 'user',
+      default: 'pending',
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    profilePicture: {
+      type: String,
+      default: '',
     },
     createdAt: {
       type: Date,

@@ -62,7 +62,7 @@ export async function extractMetadataFromFile(
 
   const model = await getModel();
 
-  const analysisPrompt = `Analyze this document. It is in Hebrew. Return a JSON object with: { summary: '2 sentence description in Hebrew', keywords: ['tag1', 'tag2', 'tag3'], category: 'General' }. Only return valid JSON, no additional text.`;
+  const analysisPrompt = `Analyze this document. It is in Hebrew. Return ONLY a valid JSON object with this exact format: { "summary": "2 sentence description in Hebrew", "keywords": ["tag1", "tag2", "tag3"], "category": "General" }. Do not include markdown code blocks or any other text.`;
 
   try {
     const result = await model.generateContent([
@@ -80,25 +80,44 @@ export async function extractMetadataFromFile(
     const responseText = result.response.text();
     console.log('Raw Gemini response:', responseText);
 
-    let jsonStr = responseText;
+    let jsonStr = responseText.trim();
+    
+    // Try to extract JSON from code blocks
     const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
       jsonStr = jsonMatch[1].trim();
-    } else {
-      jsonStr = responseText.trim();
+    }
+    
+    // Try to extract JSON object from text
+    const objectMatch = responseText.match(/\{[\s\S]*\}/);
+    if (objectMatch && !jsonStr.includes('{')) {
+      jsonStr = objectMatch[0];
     }
 
+    console.log('Parsed JSON string:', jsonStr);
     const metadata = JSON.parse(jsonStr);
 
     if (!metadata.summary || !Array.isArray(metadata.keywords) || !metadata.category) {
-      throw new Error('Invalid metadata structure');
+      console.warn('Invalid metadata structure, using defaults');
+      return {
+        summary: `Document: ${fileName}`,
+        keywords: ['document', 'pdf'],
+        category: 'General',
+      };
     }
 
     console.log('Metadata extracted successfully:', metadata);
     return metadata;
   } catch (error) {
     console.error('Error extracting metadata:', error);
-    throw new Error('Failed to extract metadata from file');
+    
+    // Return default metadata instead of throwing error
+    console.log('Using default metadata due to extraction error');
+    return {
+      summary: `Document: ${fileName}`,
+      keywords: ['document', 'pdf'],
+      category: 'General',
+    };
   }
 }
 

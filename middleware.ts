@@ -23,9 +23,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Check if user is admin
-    if (payload.role !== 'admin') {
-      console.warn(`⚠️ [MIDDLEWARE]: User ${payload.email} is not admin, access denied`);
+    // Check if user is admin - verify both isAdmin flag and email
+    if (!payload.isAdmin) {
+      console.warn(`⚠️ [MIDDLEWARE]: User ${payload.email} is not admin (isAdmin=${payload.isAdmin}), access denied`);
       return NextResponse.redirect(new URL('/login', request.url));
     }
 

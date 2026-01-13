@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { FiSettings, FiPlus, FiMessageSquare, FiTrash2 } from 'react-icons/fi';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import UploadButton from '../admin/UploadButton';
@@ -21,14 +22,25 @@ interface SidebarProps {
 export default function Sidebar({ userRole, currentChatId, onChatSelect, refreshTrigger }: SidebarProps) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-  console.log('Sidebar received userRole:', userRole);
+  // Simple admin check: email match OR isAdmin flag
+  const isSystemAdmin = user && (
+    user.email === 'admin@admin.com' || 
+    user.isAdmin === true
+  );
 
   // Fetch chats from API
   useEffect(() => {
     const loadChats = async () => {
       try {
         const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (userData) {
+          setUser(JSON.parse(userData));
+        }
+
         if (!token) {
           setIsLoading(false);
           return;
@@ -55,6 +67,21 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
 
     loadChats();
   }, [refreshTrigger]);
+
+  // Listen for auth state changes (profile picture updates on login)
+  useEffect(() => {
+    const handleAuthStateChanged = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+    };
+
+    window.addEventListener('authStateChanged', handleAuthStateChanged);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthStateChanged);
+    };
+  }, []);
 
   const handleNewChat = () => {
     console.log('New Chat button clicked, setting currentChatId to null');
@@ -112,9 +139,12 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
   };
 
   return (
-    <div className="w-64 bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30">
-      {/* New Chat Button */}
-      <div className="p-4 border-b border-brand-slate/30">
+    <div className="w-64 h-screen bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30 overflow-hidden">
+      {/* Top Section - Logo & New Chat Button */}
+      <div className="flex-shrink-0 border-b border-brand-slate/30 flex flex-col gap-2 p-2">
+        <div className="text-center">
+          <p className="text-sm font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</p>
+        </div>
         <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-brand hover:shadow-brand text-white rounded-lg transition-all duration-200 font-semibold shadow-md"
@@ -124,8 +154,8 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
         </button>
       </div>
 
-      {/* Previous Chats */}
-      <div className="flex-1 overflow-y-auto p-3">
+      {/* Middle Section - Recent Chats (Scrollable Only) */}
+      <div className="flex-1 overflow-y-auto min-h-0 p-1 border-b border-brand-slate/30">
         <p className="text-xs text-brand-light/70 font-semibold px-3 py-2 uppercase tracking-wider">
           Recent Chats
         </p>
@@ -166,20 +196,42 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
         </div>
       </div>
 
-      {/* Admin Upload Button for Admins */}
-      {userRole === 'admin' && (
-        <div className="p-4 border-t border-brand-slate/30">
-          <UploadButton />
-        </div>
-      )}
+      {/* Bottom Section - Upload & Profile (Always Visible) */}
+      <div className="flex-shrink-0 flex flex-col">
+        {/* Admin Upload Button for Admins */}
+        {isSystemAdmin && (
+          <div className="p-4 border-b border-brand-slate/30">
+            <UploadButton />
+          </div>
+        )}
 
-      {/* Settings Button */}
-      <div className="p-4 border-t border-brand-slate/30">
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 hover:bg-brand-slate/50 rounded-lg transition-all duration-200 font-semibold text-brand-light hover:text-brand-accent">
-          <FiSettings className="w-4 h-4" />
-          Settings
-        </button>
+        {/* User Profile Section */}
+        {user && (
+          <div className="p-2">
+            <Link href="/settings" className="w-full flex items-center gap-3 px-3 py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
+              {/* Profile Picture */}
+              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {user.profilePicture ? (
+                  <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white font-semibold text-sm">
+                    {user.name?.charAt(0).toUpperCase() || '?'}
+                  </span>
+                )}
+              </div>
+              
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-brand-cream truncate">{user.name}</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">
+                  {isSystemAdmin ? 'Admin' : 'User'}
+                </p>
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }

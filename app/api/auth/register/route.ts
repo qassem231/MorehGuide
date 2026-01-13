@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: 'user',
+      isAdmin: false,
     });
 
     console.log(`✅ [REGISTER API]: User created successfully with ID: ${newUser._id}`);
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
       userId: newUser._id.toString(),
       email: newUser.email,
       role: newUser.role,
+      isAdmin: newUser.isAdmin || false,
     });
 
     return NextResponse.json(
@@ -75,7 +77,9 @@ export async function POST(request: NextRequest) {
           id: newUser._id,
           name: newUser.name,
           email: newUser.email,
-          role: newUser.role,
+          isAdmin: newUser.isAdmin || false,
+          role: 'user',
+          profilePicture: '',
         },
       },
       { status: 201 }

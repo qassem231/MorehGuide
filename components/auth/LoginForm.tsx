@@ -49,7 +49,10 @@ export default function LoginForm() {
       // Give a tiny delay to ensure localStorage is committed before redirect
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      console.log('✅ [LOGIN FORM]: Login successful, redirecting to /chat');
+      console.log('✅ [LOGIN FORM]: Login successful, refreshing server state');
+      router.refresh();
+
+      console.log('✅ [LOGIN FORM]: Redirecting to /chat');
       router.push('/chat');
     } catch (error: any) {
       console.error('❌ [LOGIN FORM]: Login error:', error);

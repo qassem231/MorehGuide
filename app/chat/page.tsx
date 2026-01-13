@@ -48,30 +48,14 @@ export default function Chat() {
     try {
       const parsedUser = JSON.parse(storedUser);
       console.log(`✅ [CHAT PAGE]: User authorized: ${parsedUser.email}`);
+      
+      // User has a valid token, authorize them
       setUser(parsedUser);
       setIsAuthorized(true);
     } catch (error) {
       console.error('❌ [CHAT PAGE]: Failed to parse user data:', error);
       router.push('/login');
     }
-
-    // Listen for auth state changes from LoginForm
-    const handleAuthStateChanged = () => {
-      console.log('🔄 [CHAT PAGE]: Auth state changed event received');
-      const newToken = localStorage.getItem('token');
-      const newUser = localStorage.getItem('user');
-
-      if (newToken && newUser) {
-        setUser(JSON.parse(newUser));
-        setIsAuthorized(true);
-      }
-    };
-
-    window.addEventListener('authStateChanged', handleAuthStateChanged);
-
-    return () => {
-      window.removeEventListener('authStateChanged', handleAuthStateChanged);
-    };
   }, [router]);
 
   const handleChatSelect = (chatId: string | null) => {
@@ -116,21 +100,34 @@ export default function Chat() {
 
   // Render chat interface once authorized
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-brand-dark">
-      <Sidebar 
-        userRole={user?.role || 'user'} 
-        currentChatId={currentChatId} 
-        onChatSelect={handleChatSelect}
-        refreshTrigger={refreshTrigger}
-      />
-      <ChatArea 
-        key={currentChatId}
-        currentChatId={currentChatId} 
-        messages={messages}
-        setMessages={setMessages}
-        onChatIdChange={handleChatIdChange}
-        onNewChatCreated={handleNewChatCreated}
-      />
+    <div className="h-screen overflow-hidden bg-brand-dark flex flex-col">
+      {!isAuthorized ? (
+        <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-dark via-brand-slate to-brand-dark">
+          <div className="text-center">
+            <div className="animate-spin inline-block w-12 h-12 border-4 border-brand-accent/30 border-t-brand-accent rounded-full mb-4"></div>
+            <p className="text-brand-light">Loading...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex h-full w-full overflow-hidden">
+          <Sidebar
+            userRole={user?.role}
+            currentChatId={currentChatId}
+            onChatSelect={handleChatSelect}
+            refreshTrigger={refreshTrigger}
+          />
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <ChatArea 
+              key={currentChatId}
+              currentChatId={currentChatId} 
+              messages={messages}
+              setMessages={setMessages}
+              onChatIdChange={handleChatIdChange}
+              onNewChatCreated={handleNewChatCreated}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

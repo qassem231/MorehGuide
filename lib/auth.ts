@@ -37,6 +37,7 @@ export async function signToken(payload: {
   userId: string;
   email: string;
   role: string;
+  isAdmin?: boolean;
 }): Promise<string> {
   console.log(`🔑 [AUTH]: Signing JWT token for user: ${payload.email}`);
 
@@ -56,6 +57,7 @@ export async function verifyToken(token: string): Promise<{
   userId: string;
   email: string;
   role: string;
+  isAdmin?: boolean;
 } | null> {
   try {
     console.log('🔑 [AUTH]: Verifying JWT token');
@@ -65,6 +67,7 @@ export async function verifyToken(token: string): Promise<{
       userId: string;
       email: string;
       role: string;
+      isAdmin?: boolean;
     };
   } catch (error) {
     console.error('❌ [AUTH]: JWT token verification failed:', error);

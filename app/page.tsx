@@ -21,7 +21,7 @@ export default function Home() {
 
   // Show loading while checking auth state
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-dark">
+    <div className="h-full flex items-center justify-center bg-gradient-dark">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
         <div className="text-brand-cream text-xl font-semibold">Loading...</div>

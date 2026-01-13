@@ -21,7 +21,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File must be a PDF' }, { status: 400 });
     }
 
-    console.log(`📁 [UPLOAD ROUTE]: Processing PDF: ${file.name}`);
+    // Check file size (5MB limit for Gemini)
+    const fileSize = file.size;
+    if (fileSize > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size exceeds 5MB limit' }, { status: 400 });
+    }
+
+    console.log(`📁 [UPLOAD ROUTE]: Processing PDF: ${file.name} (${fileSize} bytes)`);
 
     // STEP 1: Convert File to Buffer
     console.log(`🔄 [UPLOAD ROUTE]: Converting file to buffer...`);
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Upload failed' },
+      { error: 'Upload failed: Unknown error' },
       { status: 500 }
     );
   }
