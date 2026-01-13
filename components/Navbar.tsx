@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FiLogOut, FiMenu, FiX, FiSettings, FiChevronDown } from 'react-icons/fi';
 
-export default function Navbar() {
+interface NavbarProps {
+  onMobileSidebarToggle?: (isOpen: boolean) => void;
+  isMobileSidebarOpen?: boolean;
+}
+
+export default function Navbar({ onMobileSidebarToggle, isMobileSidebarOpen = false }: NavbarProps = {}) {
   const [user, setUser] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobileSidebarOpen_local, setIsMobileSidebarOpen_local] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -81,6 +87,11 @@ export default function Navbar() {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  // Handle mobile sidebar toggle callback
+  useEffect(() => {
+    onMobileSidebarToggle?.(isMobileSidebarOpen_local);
+  }, [isMobileSidebarOpen_local, onMobileSidebarToggle]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -210,13 +221,28 @@ export default function Navbar() {
             ) : null}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="sm:hidden text-brand-cream hover:text-brand-accent transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
+          {/* Mobile Menu Button + Sidebar Toggle */}
+          <div className="sm:hidden flex items-center gap-2">
+            {/* Sidebar Toggle (only show on chat page) */}
+            {pathname === '/chat' && (
+              <button
+                className="text-brand-cream hover:text-brand-accent transition-colors p-2"
+                onClick={() => setIsMobileSidebarOpen_local(!isMobileSidebarOpen_local)}
+                aria-label="Toggle sidebar"
+              >
+                {isMobileSidebarOpen_local ? <FiX size={24} /> : <FiMenu size={24} />}
+              </button>
+            )}
+            
+            {/* Main Menu Button */}
+            <button
+              className="text-brand-cream hover:text-brand-accent transition-colors p-2"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 

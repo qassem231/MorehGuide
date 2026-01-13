@@ -178,7 +178,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
 
       {/* Middle Section - Recent Chats (Scrollable Only) - Hidden for Guests */}
       {!isGuest ? (
-        <div className="flex-1 overflow-y-auto min-h-0 p-1 border-b border-brand-slate/30">
+        <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 p-1 border-b border-brand-slate/30">
           <p className="text-xs text-brand-light/70 font-semibold px-3 py-2 uppercase tracking-wider">
             Recent Chats
           </p>

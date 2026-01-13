@@ -17,6 +17,7 @@ export default function Chat() {
   const [user, setUser] = useState<User | null>(null);
   const [isGuest, setIsGuest] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     {
       role: 'assistant',
@@ -98,7 +99,7 @@ export default function Chat() {
   // Render loading state while checking authorization
   if (!isAuthorized) {
     return (
-      <div className="flex h-[calc(100vh-64px)] bg-brand-cream items-center justify-center">
+      <div className="flex h-[calc(100dvh-64px)] bg-brand-cream items-center justify-center">
         <div className="text-center">
           <div className="inline-block">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accent"></div>
@@ -111,7 +112,7 @@ export default function Chat() {
 
   // Render chat interface once authorized
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-brand-dark">
+    <div className="flex h-[calc(100dvh-64px)] overflow-hidden bg-brand-dark w-full">
       {!isAuthorized ? (
         <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark">
           <div className="text-center">
@@ -121,13 +122,42 @@ export default function Chat() {
         </div>
       ) : (
         <>
-          <Sidebar
-            userRole={user?.role || null}
-            currentChatId={currentChatId}
-            onChatSelect={handleChatSelect}
-            refreshTrigger={refreshTrigger}
-            isGuest={isGuest}
-          />
+          {/* Desktop Sidebar */}
+          <div className="hidden md:flex md:w-64 md:shrink-0">
+            <Sidebar
+              userRole={user?.role || null}
+              currentChatId={currentChatId}
+              onChatSelect={handleChatSelect}
+              refreshTrigger={refreshTrigger}
+              isGuest={isGuest}
+            />
+          </div>
+
+          {/* Mobile Sidebar Overlay */}
+          {isMobileSidebarOpen && (
+            <div className="fixed inset-0 z-40 md:hidden">
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setIsMobileSidebarOpen(false)}
+              ></div>
+              {/* Sidebar */}
+              <div className="absolute left-0 top-0 bottom-0 w-64 bg-brand-slate border-r border-brand-slate/30 overflow-y-auto z-50">
+                <Sidebar
+                  userRole={user?.role || null}
+                  currentChatId={currentChatId}
+                  onChatSelect={(chatId) => {
+                    handleChatSelect(chatId);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  refreshTrigger={refreshTrigger}
+                  isGuest={isGuest}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Chat Area */}
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ChatArea 
               key={currentChatId}
