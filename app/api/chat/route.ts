@@ -162,15 +162,19 @@ export async function POST(request: NextRequest) {
     if (!isGuest) {
       await connectToDatabase();
 
+      const now = new Date();
+      const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
       const assistantMsg = { role: 'assistant' as const, content: String(finalResponse), createdAt: new Date() };
 
       if (chatId) {
-        // Save to new Chat collection
+        // Save to new Chat collection - save BOTH user and assistant messages
         await Chat.findOneAndUpdate(
           { chatId, userId: user.userId },
           {
             $push: {
-              messages: assistantMsg,
+              messages: {
+                $each: [userMsg, assistantMsg],
+              },
             },
           },
           { new: true }
@@ -178,9 +182,6 @@ export async function POST(request: NextRequest) {
       } else {
         // Keep history from growing forever (last 200 messages)
         // Save to legacy ChatHistory collection
-        const now = new Date();
-        const userMsg = { role: 'user' as const, content: String(message), createdAt: now };
-
         await ChatHistory.findOneAndUpdate(
           { userId: user.userId },
           {

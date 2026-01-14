@@ -21,10 +21,10 @@ export default function Home() {
 
   // Show loading while checking auth state
   return (
-    <div className="h-full flex items-center justify-center bg-gradient-dark">
+    <div className="h-full flex items-center justify-center bg-gradient-dark dark:bg-gradient-to-br dark:from-gray-50 dark:to-white">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
-        <div className="text-brand-cream text-xl font-semibold">Loading...</div>
+        <div className="w-12 h-12 border-4 border-brand-accent dark:border-blue-600 border-t-transparent dark:border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-brand-cream dark:text-gray-900 text-xl font-semibold">Loading...</div>
       </div>
     </div>
   );
