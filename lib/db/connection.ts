@@ -19,6 +19,11 @@ if (!cached) {
   cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
+/**
+ * Connect to MongoDB database
+ * Reuses existing connection if available (cached)
+ * @returns Mongoose connection instance
+ */
 export async function connectToDatabase() {
   if (cached.conn) {
     console.log('✅ [DB]: Using cached MongoDB connection');

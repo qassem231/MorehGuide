@@ -2,6 +2,11 @@
 
 import { ReactNode } from 'react';
 
+/**
+ * Reusable Button component with multiple variants
+ * Supports primary, secondary, and danger styles
+ * Shows loading state with spinner while disabled
+ */
 interface ButtonProps {
   children: ReactNode;
   variant?: 'primary' | 'secondary' | 'danger';
@@ -12,6 +17,16 @@ interface ButtonProps {
   className?: string;
 }
 
+/**
+ * Button component
+ * @param children - Button text or content
+ * @param variant - Style variant (default: 'primary')
+ * @param isLoading - Show loading spinner and disable (default: false)
+ * @param disabled - Disable button (default: false)
+ * @param onClick - Click handler function
+ * @param type - HTML button type (default: 'button')
+ * @param className - Additional Tailwind classes
+ */
 export default function Button({
   children,
   variant = 'primary',

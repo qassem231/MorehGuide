@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FiLogOut, FiMenu, FiX, FiSettings, FiChevronDown, FiSun, FiMoon } from 'react-icons/fi';
-import { useMobileSidebar } from '@/lib/MobileSidebarContext';
-import { useTheme } from '@/lib/ThemeContext';
+import { useMobileSidebar } from '@/lib/contexts/MobileSidebarContext';
+import { useTheme } from '@/lib/contexts/ThemeContext';
 
 interface NavbarProps {}
 

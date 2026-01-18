@@ -1,29 +1,10 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import { verifyToken, signToken } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/db/connection';
+import { verifyToken, signToken } from '@/lib/auth/auth';
+import { getUserFromRequest } from '@/lib/auth/helpers';
 import User from '@/backend/models/User';
-
-function extractToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
-    return authHeader.slice(7).trim();
-  }
-
-  const cookieToken = request.cookies.get('token')?.value;
-  if (cookieToken && cookieToken.trim() !== '') {
-    return cookieToken.trim();
-  }
-
-  return null;
-}
-
-async function getUserFromRequest(request: NextRequest) {
-  const token = extractToken(request);
-  if (!token) return null;
-  return await verifyToken(token);
-}
 
 /**
  * POST /api/admin/setup

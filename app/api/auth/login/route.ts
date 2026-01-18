@@ -1,9 +1,9 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db/connection';
 import User from '@/backend/models/User';
-import { verifyPassword, signToken } from '@/lib/auth';
+import { verifyPassword, signToken } from '@/lib/auth/auth';
 
 export async function POST(request: NextRequest) {
   console.log('🔐 [LOGIN API]: Received login request');

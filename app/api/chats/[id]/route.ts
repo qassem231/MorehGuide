@@ -1,8 +1,8 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/db/connection';
+import { verifyToken } from '@/lib/auth/auth';
 import Chat from '@/backend/models/Chat';
 
 function extractToken(request: NextRequest): string | null {

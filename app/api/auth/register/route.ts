@@ -1,9 +1,9 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db/connection';
 import User from '@/backend/models/User';
-import { hashPassword, signToken } from '@/lib/auth';
+import { hashPassword, signToken } from '@/lib/auth/auth';
 
 export async function POST(request: NextRequest) {
   console.log('📝 [REGISTER API]: Received registration request');

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/chat/Sidebar';
-import ChatArea from '@/components/chat/ChatArea';
-import { useMobileSidebar } from '@/lib/MobileSidebarContext';
+import Sidebar from '@/components/features/chat/Sidebar';
+import ChatArea from '@/components/features/chat/ChatArea';
+import { useMobileSidebar } from '@/lib/contexts/MobileSidebarContext';
 
 interface User {
   id: string;

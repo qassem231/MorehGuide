@@ -7,6 +7,8 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secr
 
 /**
  * Hash a password using bcryptjs
+ * @param password - Plain text password
+ * @returns Hashed password string
  */
 export async function hashPassword(password: string): Promise<string> {
   console.log('🔐 [AUTH]: Hashing password with bcryptjs');
@@ -18,6 +20,9 @@ export async function hashPassword(password: string): Promise<string> {
 
 /**
  * Verify a password against its bcryptjs hash
+ * @param password - Plain text password to verify
+ * @param hash - Hashed password to compare against
+ * @returns Boolean indicating if password matches
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   console.log('🔐 [AUTH]: Verifying password against hash');
@@ -32,6 +37,8 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 /**
  * Sign a JWT token using jose
+ * @param payload - User data to include in token (userId, email, role, etc)
+ * @returns JWT token string
  */
 export async function signToken(payload: {
   userId: string;
@@ -53,6 +60,8 @@ export async function signToken(payload: {
 
 /**
  * Verify a JWT token using jose
+ * @param token - JWT token string to verify
+ * @returns Decoded token payload or null if invalid
  */
 export async function verifyToken(token: string): Promise<{
   userId: string;

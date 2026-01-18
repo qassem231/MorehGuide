@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken } from '@/lib/auth/auth';
 
 export async function middleware(request: NextRequest) {
   // Only protect admin routes

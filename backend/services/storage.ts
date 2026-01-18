@@ -2,13 +2,18 @@
 
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { connectToDatabase } from '@/lib/db/connection';
-import { PdfDocument } from './models/PdfDocument';
+import { PdfDocument } from '@/backend/models/PdfDocument';
 import { getModel } from '@/backend/services/gemini';
 import fs from 'fs';
 import path from 'path';
 
 const fileManager = new GoogleAIFileManager(process.env.GOOGLE_API_KEY!);
 
+/**
+ * Convert uploaded File to Buffer
+ * @param file - File object from form submission
+ * @returns Object containing buffer and filename
+ */
 export async function uploadPdfToMongoDB(file: File): Promise<{ buffer: Buffer; fileName: string }> {
   console.log(`🟢 [UPLOAD]: Starting processing for file: ${file.name}`);
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -17,6 +22,12 @@ export async function uploadPdfToMongoDB(file: File): Promise<{ buffer: Buffer; 
   return { buffer, fileName: file.name };
 }
 
+/**
+ * Upload file to Google's Gemini File API
+ * @param file - File object
+ * @param buffer - File buffer
+ * @returns URI and MIME type of uploaded file
+ */
 export async function uploadFileToGeminiAPI(
   file: File,
   buffer: Buffer
@@ -54,6 +65,13 @@ export async function uploadFileToGeminiAPI(
   }
 }
 
+/**
+ * Extract metadata from PDF using Gemini
+ * Analyzes document to generate summary, keywords, and category
+ * @param geminiFileUri - URI of file in Gemini
+ * @param fileName - Original filename
+ * @returns Object with summary, keywords, and category
+ */
 export async function extractMetadataFromFile(
   geminiFileUri: string,
   fileName: string
@@ -121,6 +139,14 @@ export async function extractMetadataFromFile(
   }
 }
 
+/**
+ * Save PDF document to MongoDB
+ * @param fileName - Document filename
+ * @param fileBuffer - File binary data
+ * @param metadata - Document metadata (summary, keywords, category)
+ * @param audience - Who can access ('student', 'lecturer', or 'everyone')
+ * @returns MongoDB document ID
+ */
 export async function savePdfDocumentToMongoDB(
   fileName: string,
   fileBuffer: Buffer,

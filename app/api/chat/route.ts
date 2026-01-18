@@ -7,10 +7,10 @@ import {
   generateGeneralResponse,
   generateContextualResponse,
   uploadFileToGeminiForChat,
-} from '@/backend/gemini';
+} from '@/backend/services/gemini';
 
-import { connectToDatabase } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/db/connection';
+import { verifyToken } from '@/lib/auth/auth';
 import ChatHistory from '@/backend/models/ChatHistory';
 import Chat from '@/backend/models/Chat';
 

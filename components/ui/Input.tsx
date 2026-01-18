@@ -2,6 +2,11 @@
 
 import { forwardRef } from 'react';
 
+/**
+ * Reusable Input component with validation states
+ * Supports labels, error messages, and custom styling
+ * Used in forms throughout the application
+ */
 interface InputProps {
   label?: string;
   error?: string;
@@ -18,6 +23,22 @@ interface InputProps {
   autoComplete?: string;
 }
 
+/**
+ * Input component
+ * @param label - Display label above input
+ * @param error - Error message to show (changes styling to red)
+ * @param type - HTML input type (default: 'text')
+ * @param placeholder - Placeholder text
+ * @param value - Current input value
+ * @param onChange - Fired when input changes
+ * @param onKeyPress - Fired when key pressed (useful for Enter handling)
+ * @param required - Mark as required
+ * @param disabled - Disable the input
+ * @param className - Additional Tailwind classes
+ * @param id - HTML id attribute
+ * @param name - HTML name attribute
+ * @param autoComplete - HTML autocomplete attribute
+ */
 const Input = forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,

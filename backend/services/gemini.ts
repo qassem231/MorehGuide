@@ -23,6 +23,10 @@ interface KnowledgeDoc {
   metadata: DocumentMetadata;
 }
 
+/**
+ * Get Gemini model instance with standard configuration
+ * @returns Gemini model for content generation
+ */
 export async function getModel() {
   return genAI.getGenerativeModel({
     model: 'gemini-flash-latest',
@@ -35,6 +39,11 @@ export async function getModel() {
   });
 }
 
+/**
+ * Fetch all documents from MongoDB for knowledge base menu
+ * Used to determine which document is most relevant to user query
+ * @returns String containing list of all documents with metadata
+ */
 export async function fetchKnowledgeBaseMenu(): Promise<string> {
   console.log('📚 [FETCH MENU]: Fetching lightweight knowledge base documents...');
   
@@ -62,6 +71,12 @@ export async function fetchKnowledgeBaseMenu(): Promise<string> {
   }
 }
 
+/**
+ * Use Gemini to select the most relevant document for a user query
+ * @param message - User question/query
+ * @param menu - List of available documents
+ * @returns Document ID or 'NONE' if no relevant document found
+ */
 export async function selectRelevantDocument(message: string, menu: string): Promise<string> {
   console.log(`🔍 [ROUTER]: Searching for documents relevant to: "${message}"`);
   
@@ -106,6 +121,12 @@ Which single document ID is most relevant to answer this question? Return ONLY t
   }
 }
 
+/**
+ * Generate AI response without document context
+ * Used when no relevant document is found
+ * @param message - User question
+ * @returns AI generated response in Hebrew
+ */
 export async function generateGeneralResponse(message: string): Promise<string> {
   console.log('💬 [GENERAL]: Generating general response (no document context)...');
   
@@ -133,6 +154,11 @@ User Question: ${message}`;
   }
 }
 
+/**
+ * Upload a document from MongoDB to Gemini for querying
+ * @param documentId - MongoDB document ID
+ * @returns URI and MIME type of uploaded file in Gemini
+ */
 export async function uploadFileToGeminiForChat(documentId: string): Promise<{ uri: string; mimeType: string }> {
   console.log(`📤 [UPLOAD]: Fetching document ${documentId} from MongoDB and uploading to Gemini...`);
 
@@ -218,6 +244,13 @@ export async function uploadFileToGeminiForChat(documentId: string): Promise<{ u
   }
 }
 
+/**
+ * Generate AI response with document context
+ * Sends document to Gemini to answer user query based on document content
+ * @param message - User question
+ * @param geminiFileUri - URI of file uploaded to Gemini
+ * @returns AI generated response based on document context
+ */
 export async function generateContextualResponse(
   message: string,
   geminiFileUri: string

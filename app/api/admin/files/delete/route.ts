@@ -1,7 +1,7 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db/connection';
 import { ObjectId } from 'mongodb';
 
 export async function DELETE(request: NextRequest) {

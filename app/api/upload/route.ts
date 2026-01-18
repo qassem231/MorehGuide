@@ -6,7 +6,7 @@ import {
   uploadFileToGeminiAPI,
   extractMetadataFromFile,
   savePdfDocumentToMongoDB,
-} from '@/backend/storage';
+} from '@/backend/services/storage';
 
 export async function POST(request: NextRequest) {
   try {
