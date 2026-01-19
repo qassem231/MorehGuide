@@ -161,9 +161,11 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
   };
 
   return (
-    <div className="w-64 h-full bg-brand-slate/50 backdrop-blur-sm text-brand-cream flex flex-col shadow-lg border-r border-brand-slate/30 overflow-hidden">
+    // FIX: Light mode uses gray-50 bg + dark text. Dark mode uses brand-slate bg + cream text.
+    <div className="w-64 h-full bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 text-gray-900 dark:text-gray-100 flex flex-col shadow-lg overflow-hidden transition-colors duration-300">
+      
       {/* Top Section - Logo & New Chat Button */}
-      <div className="shrink-0 border-b border-brand-slate/30 flex flex-col gap-2 p-2">
+      <div className="shrink-0 border-b border-gray-200 dark:border-brand-slate/30 flex flex-col gap-2 p-2 transition-colors duration-300">
         <div className="text-center">
           <p className="text-sm font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</p>
         </div>
@@ -178,37 +180,46 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
 
       {/* Middle Section - Recent Chats (Scrollable Only) - Hidden for Guests */}
       {!isGuest ? (
-        <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 p-1 border-b border-brand-slate/30">
-          <p className="text-xs text-brand-light/70 font-semibold px-2 sm:px-3 py-2 uppercase tracking-wider">
+        <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 p-1 border-b border-gray-200 dark:border-brand-slate/30 transition-colors duration-300">
+          <p className="text-xs text-gray-500 dark:text-brand-light/70 font-semibold px-2 sm:px-3 py-2 uppercase tracking-wider">
             Recent Chats
           </p>
           <div className="space-y-1">
             {isLoading ? (
-              <p className="text-xs text-brand-light/50 px-2 sm:px-3 py-2">Loading chats...</p>
+              <p className="text-xs text-gray-400 dark:text-brand-light/50 px-2 sm:px-3 py-2">Loading chats...</p>
             ) : chats.length === 0 ? (
-              <p className="text-xs text-brand-light/50 px-2 sm:px-3 py-2">No chats yet</p>
+              <p className="text-xs text-gray-400 dark:text-brand-light/50 px-2 sm:px-3 py-2">No chats yet</p>
             ) : (
               chats.map((chat) => (
                 <div
                   key={chat._id}
+                  // FIX: Hover states and Active states adapted for light/dark
                   className={`flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${
                     currentChatId === chat.chatId
-                      ? 'bg-brand-slate/80 border-l-2 border-brand-accent'
-                      : 'hover:bg-brand-slate/50'
-                }`}
+                      ? 'bg-gray-200 dark:bg-brand-slate/80 border-l-2 border-brand-accent'
+                      : 'hover:bg-gray-200 dark:hover:bg-brand-slate/50'
+                  }`}
                 >
                   <button
                     onClick={() => handleChatSelect(chat.chatId)}
                     className="flex-1 flex items-center gap-2 text-left truncate min-w-0"
                   >
-                    <FiMessageSquare className="w-4 h-4 text-brand-light/60 group-hover:text-brand-accent shrink-0" />
-                    <span className="text-xs sm:text-sm text-brand-cream/80 group-hover:text-brand-cream truncate">
+                    <FiMessageSquare className={`w-4 h-4 shrink-0 transition-colors ${
+                        currentChatId === chat.chatId 
+                        ? 'text-brand-accent' 
+                        : 'text-gray-400 dark:text-brand-light/60 group-hover:text-brand-accent'
+                    }`} />
+                    <span className={`text-xs sm:text-sm truncate transition-colors ${
+                        currentChatId === chat.chatId 
+                        ? 'text-gray-900 dark:text-brand-cream font-medium' 
+                        : 'text-gray-600 dark:text-brand-cream/80 group-hover:text-gray-900 dark:group-hover:text-brand-cream'
+                    }`}>
                       {chat.title}
                     </span>
                   </button>
                   <button
                     onClick={(e) => handleDeleteChat(e, chat._id)}
-                    className="p-1.5 rounded hover:bg-red-500/20 text-brand-light/60 hover:text-red-400 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100 shrink-0"
+                    className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 dark:text-brand-light/60 hover:text-red-600 dark:hover:text-red-400 transition-colors lg:opacity-0 lg:group-hover:opacity-100 opacity-100 shrink-0"
                     title="Delete chat"
                     aria-label="Delete chat"
                   >
@@ -220,15 +231,15 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center border-b border-brand-slate/30">
-          <p className="text-xs text-brand-light/50 text-center px-2">Guest mode: No chat history</p>
+        <div className="flex-1 flex items-center justify-center border-b border-gray-200 dark:border-brand-slate/30">
+          <p className="text-xs text-gray-400 dark:text-brand-light/50 text-center px-2">Guest mode: No chat history</p>
         </div>
       )}
 
       {/* Bottom Section - Upload & Profile (Always Visible) */}
       <div className="shrink-0 flex flex-col">
         {isSystemAdmin && !isGuest && (
-          <div className="p-2 sm:p-4 border-b border-brand-slate/30">
+          <div className="p-2 sm:p-4 border-b border-gray-200 dark:border-brand-slate/30 transition-colors duration-300">
             <UploadButton />
           </div>
         )}
@@ -236,7 +247,7 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
         {/* User Profile Section - Hidden for Guests */}
         {user && !isGuest && (
           <div className="p-1 sm:p-2">
-            <Link href="/settings" className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
+            <Link href="/settings" className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 hover:bg-gray-200 dark:hover:bg-brand-slate/50 rounded-lg transition-all duration-200">
               {/* Profile Picture */}
               <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
                 {user.profilePicture ? (
@@ -250,18 +261,18 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
               
               {/* User Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-brand-cream truncate">{user.name}</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-brand-cream truncate">{user.name}</p>
                 {/* Role Label - Priority: Admin > Student > Lecturer */}
                 {isSystemAdmin ? (
-                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                  <p className="text-xs font-bold tracking-wide text-sky-600 dark:text-sky-400">
                     Admin
                   </p>
                 ) : user.activeRole === 'student' ? (
-                  <p className="text-xs font-bold tracking-wide text-emerald-400">
+                  <p className="text-xs font-bold tracking-wide text-emerald-600 dark:text-emerald-400">
                     Student
                   </p>
                 ) : user.activeRole === 'lecturer' ? (
-                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                  <p className="text-xs font-bold tracking-wide text-sky-600 dark:text-sky-400">
                     Lecturer
                   </p>
                 ) : null}
@@ -270,24 +281,21 @@ export default function Sidebar({ userRole, currentChatId, onChatSelect, refresh
           </div>
         )}
         
-        {/* Guest Mode Profile Section - Same Design as Authenticated */}
+        {/* Guest Mode Profile Section */}
         {isGuest && user && (
           <div className="p-1 sm:p-2">
             <div className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 rounded-lg">
-              {/* Profile Picture */}
               <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-brand flex items-center justify-center shrink-0 overflow-hidden">
                 <span className="text-white font-semibold text-xs sm:text-sm">G</span>
               </div>
-              
-              {/* User Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-brand-cream truncate">Guest User</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-brand-cream truncate">Guest User</p>
                 {user.role === 'user' ? (
-                  <p className="text-xs font-bold tracking-wide text-emerald-400">
+                  <p className="text-xs font-bold tracking-wide text-emerald-600 dark:text-emerald-400">
                     Student
                   </p>
                 ) : (
-                  <p className="text-xs font-bold tracking-wide text-sky-400">
+                  <p className="text-xs font-bold tracking-wide text-sky-600 dark:text-sky-400">
                     Lecturer
                   </p>
                 )}

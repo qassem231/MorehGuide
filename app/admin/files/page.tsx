@@ -177,11 +177,11 @@ export default function AdminFilesPage() {
   const getAudienceBadge = (audience: string) => {
     switch (audience) {
       case 'student':
-        return { label: '👨‍🎓 Students', bgColor: 'bg-emerald-500/20', borderColor: 'border-emerald-500/50', textColor: 'text-emerald-400' };
+        return { label: '👨‍🎓 Students', bgColor: 'bg-emerald-100 dark:bg-emerald-500/20', borderColor: 'border-emerald-200 dark:border-emerald-500/50', textColor: 'text-emerald-700 dark:text-emerald-400' };
       case 'lecturer':
-        return { label: '👨‍🏫 Lecturers', bgColor: 'bg-sky-500/20', borderColor: 'border-sky-500/50', textColor: 'text-sky-400' };
+        return { label: '👨‍🏫 Lecturers', bgColor: 'bg-sky-100 dark:bg-sky-500/20', borderColor: 'border-sky-200 dark:border-sky-500/50', textColor: 'text-sky-700 dark:text-sky-400' };
       default:
-        return { label: '🌍 Everyone', bgColor: 'bg-slate-500/20', borderColor: 'border-slate-500/50', textColor: 'text-slate-400' };
+        return { label: '🌍 Everyone', bgColor: 'bg-slate-100 dark:bg-slate-500/20', borderColor: 'border-slate-200 dark:border-slate-500/50', textColor: 'text-slate-700 dark:text-slate-400' };
     }
   };
 
@@ -254,14 +254,15 @@ export default function AdminFilesPage() {
   };
 
   return (
-    <div className="min-h-full bg-linear-to-br from-brand-dark via-brand-slate to-brand-dark dark:from-gray-50 dark:via-white dark:to-gray-50 p-4 sm:p-6 md:p-8 transition-colors duration-300">
+    // FIX: Main Background
+    <div className="min-h-full bg-gray-50 dark:bg-brand-dark p-4 sm:p-6 md:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Authorization Check */}
         {!isAuthorized && (
-          <div className="p-4 bg-red-500/20 dark:bg-red-100 border border-red-500/50 dark:border-red-300 rounded-lg text-red-400 dark:text-red-600 mb-6">
+          <div className="p-4 bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/50 rounded-lg text-red-700 dark:text-red-400 mb-6">
             <p className="font-semibold">Access Denied</p>
             <p className="text-sm mt-2">{error || 'Checking authorization...'}</p>
-            {error && <p className="text-xs mt-2 text-red-300 dark:text-red-500">Redirecting to chat in 2 seconds...</p>}
+            {error && <p className="text-xs mt-2 text-red-600 dark:text-red-300">Redirecting to chat in 2 seconds...</p>}
           </div>
         )}
 
@@ -272,16 +273,16 @@ export default function AdminFilesPage() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Link
                   href="/chat"
-                  className="flex items-center gap-2 text-brand-light dark:text-gray-700 hover:text-brand-accent dark:hover:text-blue-600 font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:bg-brand-slate/50 dark:hover:bg-gray-200 text-sm sm:text-base"
+                  className="flex items-center gap-2 text-gray-600 dark:text-brand-light hover:text-brand-accent dark:hover:text-blue-600 font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:bg-gray-200 dark:hover:bg-brand-slate/50 text-sm sm:text-base"
                 >
                   <FiArrowLeft size={20} />
                   Back to Chat
                 </Link>
-                <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-brand dark:bg-linear-to-r dark:from-blue-600 dark:to-blue-700 bg-clip-text text-transparent">Admin File Manager</h1>
+                <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-brand bg-clip-text text-transparent">Admin File Manager</h1>
               </div>
               <button
                 onClick={handleUploadClick}
-                className="flex items-center gap-2 bg-gradient-brand dark:bg-blue-600 hover:shadow-brand text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md w-full sm:w-auto justify-center sm:justify-start text-sm sm:text-base"
+                className="flex items-center gap-2 bg-gradient-brand hover:shadow-brand text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md w-full sm:w-auto justify-center sm:justify-start text-sm sm:text-base"
               >
                 <FiCloud size={20} />
                 Upload PDF
@@ -290,155 +291,155 @@ export default function AdminFilesPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-brand-slate/30 dark:bg-gray-100 backdrop-blur-sm border border-brand-slate/50 dark:border-gray-300 rounded-lg p-6 transition-colors duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-brand-light/70 dark:text-gray-600 text-sm font-semibold uppercase tracking-wide">Total Documents</p>
-                <p className="text-4xl font-bold text-brand-accent dark:text-blue-600 mt-2">{files.length}</p>
-              </div>
-              <FiFileText className="w-12 h-12 text-brand-accent/30 dark:text-blue-600/30" />
-            </div>
-          </div>
-          <div className="bg-brand-slate/30 dark:bg-gray-100 backdrop-blur-sm border border-brand-slate/50 dark:border-gray-300 rounded-lg p-6 transition-colors duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-brand-light/70 dark:text-gray-600 text-sm font-semibold uppercase tracking-wide">System Status</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <FiCheck className="w-5 h-5 text-green-400 dark:text-green-600" />
-                  <p className="text-2xl font-bold text-green-400 dark:text-green-600">Active</p>
+              <div className="bg-white dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-brand-light/70 text-sm font-semibold uppercase tracking-wide">Total Documents</p>
+                    <p className="text-4xl font-bold text-brand-accent mt-2">{files.length}</p>
+                  </div>
+                  <FiFileText className="w-12 h-12 text-brand-accent/30" />
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-full bg-green-500/20 dark:bg-green-100 border border-green-500/50 dark:border-green-400 flex items-center justify-center">
-                <div className="w-3 h-3 rounded-full bg-green-400 dark:bg-green-600 animate-pulse" />
+              <div className="bg-white dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-500 dark:text-brand-light/70 text-sm font-semibold uppercase tracking-wide">System Status</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <FiCheck className="w-5 h-5 text-green-500 dark:text-green-400" />
+                      <p className="text-2xl font-bold text-green-500 dark:text-green-400">Active</p>
+                    </div>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-500/20 border border-green-200 dark:border-green-500/50 flex items-center justify-center">
+                    <div className="w-3 h-3 rounded-full bg-green-500 dark:bg-green-400 animate-pulse" />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 dark:bg-red-100 border border-red-500/50 dark:border-red-300 rounded-lg text-red-400 dark:text-red-600">
-            <p className="font-semibold">Error: {error}</p>
-          </div>
-        )}
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/50 rounded-lg text-red-700 dark:text-red-400">
+                <p className="font-semibold">Error: {error}</p>
+              </div>
+            )}
 
-        {/* Files Table */}
-        <div className="bg-brand-slate dark:bg-white backdrop-blur-sm border border-brand-slate/50 dark:border-gray-200 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
-          {isLoading ? (
-            <div className="p-8 text-center text-brand-light/70 dark:text-gray-600">
-              <div className="animate-spin inline-block w-8 h-8 border-4 border-brand-accent/30 dark:border-blue-600/30 border-t-brand-accent dark:border-t-blue-600 rounded-full"></div>
-              <p className="mt-4">Loading files...</p>
-            </div>
-          ) : files.length === 0 ? (
-            <div className="p-8 text-center text-brand-light/50 dark:text-gray-500">
-              <FiFileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg">No files found</p>
-              <p className="text-sm mt-2">Upload your first PDF to get started</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full">
-                <thead className="bg-brand-slate/50 dark:bg-gray-100 border-b border-brand-slate/30 dark:border-gray-300 transition-colors duration-300">
-                  <tr>
-                    <th className="text-left py-4 px-3 sm:px-6 text-brand-light dark:text-gray-900 font-semibold text-xs sm:text-sm">File Name</th>
-                    <th className="text-left py-4 px-3 sm:px-6 text-brand-light dark:text-gray-900 font-semibold text-xs sm:text-sm">Audience</th>
-                    <th className="text-left py-4 px-3 sm:px-6 text-brand-light dark:text-gray-900 font-semibold text-xs sm:text-sm">Uploaded</th>
-                    <th className="text-right py-4 px-3 sm:px-6 text-brand-light dark:text-gray-900 font-semibold text-xs sm:text-sm">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-slate/30 dark:divide-gray-200 transition-colors duration-300">
-                  {files.map((file: any) => {
-                    const badge = getAudienceBadge(file.audience || 'everyone');
-                    const isEditing = editingId === file._id;
-                    
-                    return (
-                      <tr key={file._id} className="hover:bg-brand-slate/20 dark:hover:bg-gray-50 transition-colors duration-200">
-                        <td className="py-4 px-3 sm:px-6">
-                          <div className="flex items-center gap-3">
-                            <FiFileText className="w-5 h-5 text-brand-accent dark:text-blue-600 shrink-0" />
-                            <span className="text-brand-cream dark:text-gray-900 font-medium text-xs sm:text-sm truncate">{file.name || file.fileName || 'Unnamed'}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-3 sm:px-6">
-                          {isEditing ? (
-                            <div className="flex items-center gap-2">
-                              <select
-                                value={editingAudience || file.audience || 'everyone'}
-                                onChange={(e) => setEditingAudience(e.target.value as any)}
-                                className="bg-brand-dark/50 dark:bg-gray-50 border border-brand-slate/50 dark:border-gray-300 rounded px-2 py-1 text-sm text-brand-cream dark:text-gray-900 focus:outline-none focus:border-brand-accent dark:focus:border-blue-600 transition-colors duration-300"
-                              >
-                                <option value="student">👨‍🎓 Students</option>
-                                <option value="lecturer">👨‍🏫 Lecturers</option>
-                                <option value="everyone">🌍 Everyone</option>
-                              </select>
-                              <button
-                                onClick={() => handleEditAudience(file._id, editingAudience || (file.audience as any) || 'everyone')}
-                                className="text-green-400 dark:text-green-600 hover:text-green-300 dark:hover:text-green-700 transition-colors"
-                              >
-                                <FiCheck size={18} />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingId(null);
-                                  setEditingAudience(null);
-                                }}
-                                className="text-red-400 dark:text-red-600 hover:text-red-300 dark:hover:text-red-700 transition-colors"
-                              >
-                                <FiX size={18} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <div className={`px-3 py-1 rounded-lg border ${badge.bgColor} ${badge.borderColor} text-xs font-semibold ${badge.textColor}`}>
-                                {badge.label}
-                              </div>
-                              <button
-                                onClick={() => {
-                                  setEditingId(file._id);
-                                  setEditingAudience(file.audience || 'everyone');
-                                }}
-                                className="p-1 text-brand-light/60 dark:text-gray-600 hover:text-brand-accent dark:hover:text-blue-600 transition-colors"
-                              >
-                                <FiEdit2 size={16} />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-4 px-3 sm:px-6 text-brand-light/70 dark:text-gray-600 text-xs sm:text-sm">
-                          {file.uploadDate 
-                            ? new Date(file.uploadDate).toLocaleDateString() 
-                            : (file.createdAt 
-                              ? new Date(file.createdAt).toLocaleDateString() 
-                              : 'N/A')}
-                        </td>
-                        <td className="py-4 px-3 sm:px-6 text-right">
-                          <button
-                            onClick={() => handleDeleteFile(file._id)}
-                            disabled={deleting === file._id}
-                            className="flex items-center gap-2 ml-auto bg-red-500/20 dark:bg-red-100 hover:bg-red-500/40 dark:hover:bg-red-200 disabled:bg-brand-slate/50 dark:disabled:bg-gray-200 text-red-400 dark:text-red-600 hover:text-red-300 dark:hover:text-red-700 disabled:text-brand-light/50 dark:disabled:text-gray-500 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-red-500/30 dark:border-red-300 hover:border-red-500/60 dark:hover:border-red-400"
-                          >
-                            <FiTrash2 size={16} />
-                            {deleting === file._id ? 'Deleting...' : 'Delete'}
-                          </button>
-                        </td>
+            {/* Files Table */}
+            <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
+              {isLoading ? (
+                <div className="p-8 text-center text-gray-500 dark:text-brand-light/70">
+                  <div className="animate-spin inline-block w-8 h-8 border-4 border-brand-accent/30 border-t-brand-accent rounded-full"></div>
+                  <p className="mt-4">Loading files...</p>
+                </div>
+              ) : files.length === 0 ? (
+                <div className="p-8 text-center text-gray-400 dark:text-brand-light/50">
+                  <FiFileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg">No files found</p>
+                  <p className="text-sm mt-2">Upload your first PDF to get started</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-brand-slate/50 border-b border-gray-200 dark:border-brand-slate/30 transition-colors duration-300">
+                      <tr>
+                        <th className="text-left py-4 px-3 sm:px-6 text-gray-700 dark:text-brand-light font-semibold text-xs sm:text-sm">File Name</th>
+                        <th className="text-left py-4 px-3 sm:px-6 text-gray-700 dark:text-brand-light font-semibold text-xs sm:text-sm">Audience</th>
+                        <th className="text-left py-4 px-3 sm:px-6 text-gray-700 dark:text-brand-light font-semibold text-xs sm:text-sm">Uploaded</th>
+                        <th className="text-right py-4 px-3 sm:px-6 text-gray-700 dark:text-brand-light font-semibold text-xs sm:text-sm">Actions</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-brand-slate/30 transition-colors duration-300">
+                      {files.map((file: any) => {
+                        const badge = getAudienceBadge(file.audience || 'everyone');
+                        const isEditing = editingId === file._id;
+                        
+                        return (
+                          <tr key={file._id} className="hover:bg-gray-50 dark:hover:bg-brand-slate/20 transition-colors duration-200">
+                            <td className="py-4 px-3 sm:px-6">
+                              <div className="flex items-center gap-3">
+                                <FiFileText className="w-5 h-5 text-brand-accent shrink-0" />
+                                <span className="text-gray-900 dark:text-brand-cream font-medium text-xs sm:text-sm truncate">{file.name || file.fileName || 'Unnamed'}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-3 sm:px-6">
+                              {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                  <select
+                                    value={editingAudience || file.audience || 'everyone'}
+                                    onChange={(e) => setEditingAudience(e.target.value as any)}
+                                    className="bg-white dark:bg-brand-dark/50 border border-gray-300 dark:border-brand-slate/50 rounded px-2 py-1 text-sm text-gray-900 dark:text-brand-cream focus:outline-none focus:border-brand-accent transition-colors duration-300"
+                                  >
+                                    <option value="student">👨‍🎓 Students</option>
+                                    <option value="lecturer">👨‍🏫 Lecturers</option>
+                                    <option value="everyone">🌍 Everyone</option>
+                                  </select>
+                                  <button
+                                    onClick={() => handleEditAudience(file._id, editingAudience || (file.audience as any) || 'everyone')}
+                                    className="text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                                  >
+                                    <FiCheck size={18} />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingId(null);
+                                      setEditingAudience(null);
+                                    }}
+                                    className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                                  >
+                                    <FiX size={18} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <div className={`px-3 py-1 rounded-lg border ${badge.bgColor} ${badge.borderColor} text-xs font-semibold ${badge.textColor}`}>
+                                    {badge.label}
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setEditingId(file._id);
+                                      setEditingAudience(file.audience || 'everyone');
+                                    }}
+                                    className="p-1 text-gray-400 dark:text-brand-light/60 hover:text-brand-accent dark:hover:text-brand-accent transition-colors"
+                                  >
+                                    <FiEdit2 size={16} />
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-4 px-3 sm:px-6 text-gray-600 dark:text-brand-light/70 text-xs sm:text-sm">
+                              {file.uploadDate 
+                                ? new Date(file.uploadDate).toLocaleDateString() 
+                                : (file.createdAt 
+                                  ? new Date(file.createdAt).toLocaleDateString() 
+                                  : 'N/A')}
+                            </td>
+                            <td className="py-4 px-3 sm:px-6 text-right">
+                              <button
+                                onClick={() => handleDeleteFile(file._id)}
+                                disabled={deleting === file._id}
+                                className="flex items-center gap-2 ml-auto bg-red-100 hover:bg-red-200 dark:bg-red-500/20 dark:hover:bg-red-500/40 disabled:opacity-50 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-red-200 dark:border-red-500/30"
+                              >
+                                <FiTrash2 size={16} />
+                                {deleting === file._id ? 'Deleting...' : 'Delete'}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf"
-          onChange={handleFileChange}
-          className="hidden"
-          aria-label="Upload PDF file"
-          title="Upload PDF file"
-        />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="hidden"
+              aria-label="Upload PDF file"
+              title="Upload PDF file"
+            />
           </>
         )}
       </div>

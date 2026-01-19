@@ -86,11 +86,9 @@ function RoleSelectionContent() {
 
       console.log(`🔄 Starting role selection for: ${role}`);
 
-      // Simulate update({ activeRole: ... }) for session-only storage
-      // This uses await pattern but stores only in localStorage (not MongoDB)
       const activeRole = role === 'student' ? 'student' : 'lecturer';
       
-      // Store activeRole in localStorage (session-based, not persisted to DB)
+      // Store activeRole in localStorage
       localStorage.setItem('activeRole', activeRole);
       console.log(`✅ Active role stored in localStorage: ${activeRole}`);
 
@@ -119,24 +117,26 @@ function RoleSelectionContent() {
   };
 
   return (
-    <div className="h-full bg-linear-to-br from-brand-dark via-brand-dark to-brand-slate flex items-center justify-center p-4">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    // FIX: Main Background (Light: Gray-50, Dark: Brand-Dark Gradient)
+    <div className="min-h-screen bg-gray-50 dark:bg-brand-dark flex items-center justify-center p-4 transition-colors duration-300">
+      
+      {/* Animated background elements (Dark Mode Only) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden dark:block">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      {/* Loading State - prevents UI flicker while checking auth */}
+      {/* Loading State */}
       {isCheckingAuth && (
         <div className="relative z-20 text-center">
           <div className="inline-block">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brand-accent"></div>
-            <p className="text-brand-cream text-sm mt-4">Loading...</p>
+            <p className="text-gray-600 dark:text-brand-cream text-sm mt-4">Loading...</p>
           </div>
         </div>
       )}
 
-      {/* Content - only render after auth check is complete */}
+      {/* Content */}
       {!isCheckingAuth && (
         <div className="relative z-10 w-full max-w-4xl">
         {/* Header */}
@@ -155,23 +155,21 @@ function RoleSelectionContent() {
             className="group relative"
           >
             <div
-              className={`relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 transition-all duration-300 cursor-pointer overflow-hidden
-              ${selectedRole === 'student' && isLoading ? 'scale-95 opacity-50' : 'hover:scale-105 hover:border-blue-500/50'}
-              ${selectedRole === 'student' ? 'ring-2 ring-blue-500 bg-blue-500/10' : ''}`}
+              // FIX: Card Styles - White bg/Shadow for Light, Glass/Border for Dark
+              className={`relative bg-white dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl p-8 transition-all duration-300 cursor-pointer overflow-hidden shadow-xl dark:shadow-none
+              ${selectedRole === 'student' && isLoading ? 'scale-95 opacity-50' : 'hover:scale-105 hover:border-blue-500/50 hover:shadow-2xl'}
+              ${selectedRole === 'student' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-500/10' : ''}`}
             >
-              {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
               {/* Content */}
               <div className="relative z-10 text-center">
                 <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-blue-500/20 rounded-xl group-hover:bg-blue-500/30 transition-colors duration-300">
-                    <FiBookOpen className="w-12 h-12 text-blue-400" />
+                  <div className="p-4 bg-blue-100 dark:bg-blue-500/20 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-500/30 transition-colors duration-300">
+                    <FiBookOpen className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-brand-cream mb-2">Student</h2>
-                <p className="text-brand-light/70 text-sm">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-brand-cream mb-2">Student</h2>
+                <p className="text-gray-500 dark:text-brand-light/70 text-sm">
                   Learn and explore course materials at your own pace
                 </p>
 
@@ -181,9 +179,6 @@ function RoleSelectionContent() {
                   </div>
                 )}
               </div>
-
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </button>
 
@@ -194,23 +189,21 @@ function RoleSelectionContent() {
             className="group relative"
           >
             <div
-              className={`relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 transition-all duration-300 cursor-pointer overflow-hidden
-              ${selectedRole === 'lecturer' && isLoading ? 'scale-95 opacity-50' : 'hover:scale-105 hover:border-purple-500/50'}
-              ${selectedRole === 'lecturer' ? 'ring-2 ring-purple-500 bg-purple-500/10' : ''}`}
+              // FIX: Card Styles - White bg/Shadow for Light, Glass/Border for Dark
+              className={`relative bg-white dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl p-8 transition-all duration-300 cursor-pointer overflow-hidden shadow-xl dark:shadow-none
+              ${selectedRole === 'lecturer' && isLoading ? 'scale-95 opacity-50' : 'hover:scale-105 hover:border-purple-500/50 hover:shadow-2xl'}
+              ${selectedRole === 'lecturer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-500/10' : ''}`}
             >
-              {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-linear-to-br from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
               {/* Content */}
               <div className="relative z-10 text-center">
                 <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-colors duration-300">
-                    <FiUserCheck className="w-12 h-12 text-purple-400" />
+                  <div className="p-4 bg-purple-100 dark:bg-purple-500/20 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-500/30 transition-colors duration-300">
+                    <FiUserCheck className="w-12 h-12 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-brand-cream mb-2">Lecturer</h2>
-                <p className="text-brand-light/70 text-sm">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-brand-cream mb-2">Lecturer</h2>
+                <p className="text-gray-500 dark:text-brand-light/70 text-sm">
                   Create, manage, and share course materials with students
                 </p>
 
@@ -220,22 +213,19 @@ function RoleSelectionContent() {
                   </div>
                 )}
               </div>
-
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </button>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mt-8 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-center max-w-xl mx-auto">
+          <div className="mt-8 p-4 bg-red-100 dark:bg-red-500/20 border border-red-200 dark:border-red-500/50 rounded-lg text-red-600 dark:text-red-400 text-center max-w-xl mx-auto">
             {error}
           </div>
         )}
 
         {/* Footer */}
-        <div className="mt-12 text-center text-brand-light/50 text-sm">
+        <div className="mt-12 text-center text-gray-400 dark:text-brand-light/50 text-sm">
           <p>You can change your role anytime in your account settings</p>
         </div>
       </div>
@@ -246,7 +236,8 @@ function RoleSelectionContent() {
 
 export default function RoleSelectionPage() {
   return (
-    <Suspense fallback={<div className='flex h-screen items-center justify-center bg-linear-to-br from-brand-dark via-brand-dark to-brand-slate'><div className='text-center'><div className='animate-spin rounded-full h-16 w-16 border-b-2 border-brand-accent'></div><p className='text-brand-cream text-sm mt-4'>Loading...</p></div></div>}>
+    // FIX: Fallback Loading State Background
+    <Suspense fallback={<div className='flex h-screen items-center justify-center bg-gray-50 dark:bg-brand-dark'><div className='text-center'><div className='animate-spin rounded-full h-16 w-16 border-b-2 border-brand-accent'></div><p className='text-gray-600 dark:text-brand-cream text-sm mt-4'>Loading...</p></div></div>}>
       <RoleSelectionContent />
     </Suspense>
   );

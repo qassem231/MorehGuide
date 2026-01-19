@@ -29,7 +29,6 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   useEffect(() => {
     console.log('ChatArea useEffect triggered, currentChatId:', currentChatId);
     if (!currentChatId) {
-      // Messages already cleared by parent component
       console.log('currentChatId is null, messages already cleared by parent');
       return;
     }
@@ -115,18 +114,16 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         const chatData = await chatRes.json();
         activeChatId = chatData.chatId;
 
-        // Notify parent component of new chat ID
         if (onChatIdChange && activeChatId) {
           onChatIdChange(activeChatId);
         }
 
-        // Notify sidebar to refresh chat list
         if (onNewChatCreated) {
           onNewChatCreated();
         }
       }
 
-      // Step 2: Get AI response (skips saving for guests)
+      // Step 2: Get AI response
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -166,9 +163,11 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   };
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-brand-dark relative w-full">
+    // FIX: Added bg-gray-50 for light mode, dark:bg-brand-dark for dark mode
+    <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-white dark:bg-slate-950 relative w-full transition-colors duration-300">
+      
       {/* Top Bar with Header */}
-      <div className="shrink-0 h-16 border-b border-brand-slate/30 bg-brand-dark/95 backdrop-blur-sm flex items-center px-3 sm:px-6">
+      <div className="shrink-0 h-16 border-b border-gray-200 dark:border-brand-slate/30 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-sm flex items-center px-3 sm:px-6 transition-colors duration-300">
         <span className="text-xl sm:text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</span>
       </div>
 
@@ -188,16 +187,18 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
               className={`max-w-[85vw] sm:max-w-sm md:max-w-md lg:max-w-lg px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg ${
                 message.role === 'user'
                   ? 'bg-gradient-brand text-white rounded-br-none shadow-brand text-sm sm:text-base'
-                  : 'bg-brand-slate/70 text-brand-cream rounded-bl-none border border-brand-slate/50 backdrop-blur-sm text-sm sm:text-base'
+                  // FIX: Light mode uses white bg + gray text. Dark mode uses slate bg + cream text.
+                  : 'bg-white text-gray-800 border border-gray-200 dark:bg-brand-slate/70 dark:text-brand-cream dark:border-brand-slate/50 backdrop-blur-sm rounded-bl-none text-sm sm:text-base'
               }`}
               dir="auto"
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-brand-cream">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-md font-bold mb-2 text-brand-cream">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-sm font-bold mb-2 text-brand-cream">{children}</h3>,
+                  // FIX: Added dark: prefixes to text colors so headers are visible in both modes
+                  h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-md font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-sm font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h3>,
                   ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
                   ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
                   strong: ({ children }) => <strong className="font-bold">{children}</strong>,
@@ -209,7 +210,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
               </ReactMarkdown>
             </div>
             {message.role === 'user' && (
-              <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-brand-slate rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+              <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-gray-200 dark:bg-brand-slate rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                 <FiUser className="w-3 sm:w-4 h-3 sm:h-4 text-brand-accent" />
               </div>
             )}
@@ -220,7 +221,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
             <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md">
               <FiMessageSquare className="w-3 sm:w-4 h-3 sm:h-4 text-white" />
             </div>
-            <div className="max-w-[75vw] sm:max-w-xs lg:max-w-sm px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg bg-brand-slate/70 text-brand-cream rounded-bl-none border border-brand-slate/50 backdrop-blur-sm text-sm sm:text-base">
+            <div className="max-w-[75vw] sm:max-w-xs lg:max-w-sm px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg bg-white text-gray-800 border border-gray-200 dark:bg-brand-slate/70 dark:text-brand-cream dark:border-brand-slate/50 rounded-bl-none backdrop-blur-sm text-sm sm:text-base">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce [animation-delay:0.1s]"></div>
@@ -232,9 +233,9 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Floating Input Box - Absolute Positioned */}
+      {/* Floating Input Box */}
       <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-2xl sm:max-w-3xl z-10">
-        <div className="flex gap-2 sm:gap-3 p-2 sm:p-3 bg-brand-slate/50 backdrop-blur-sm rounded-full border border-brand-slate/30 shadow-lg">
+        <div className="flex gap-2 sm:gap-3 p-2 sm:p-3 bg-white/80 dark:bg-brand-slate/50 backdrop-blur-sm rounded-full border border-gray-200 dark:border-brand-slate/30 shadow-lg transition-colors duration-300">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -243,7 +244,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
               disabled={isLoading}
-              className="w-full px-3 sm:px-4 py-2 bg-brand-slate/70 border border-brand-slate/50 rounded-full text-xs sm:text-sm text-brand-cream placeholder-brand-light focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
+              className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-brand-slate/70 border border-gray-200 dark:border-brand-slate/50 rounded-full text-xs sm:text-sm text-gray-900 dark:text-brand-cream placeholder-gray-400 dark:placeholder-brand-light focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
             />
           </div>
           <button
