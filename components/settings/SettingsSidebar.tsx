@@ -19,7 +19,7 @@ export default function SettingsSidebar({
 
   return (
     <div className="lg:col-span-1">
-      <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-xl p-4 space-y-2 shadow-sm dark:shadow-none transition-colors duration-300">
+      <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-xl p-4 space-y-2 shadow-sm dark:shadow-none transition-colors duration-300">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}

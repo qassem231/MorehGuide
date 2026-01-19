@@ -22,7 +22,7 @@ export default function AudienceEditor({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as any)}
-        className="bg-white dark:bg-brand-dark/50 border border-gray-300 dark:border-brand-slate/50 rounded px-2 py-1 text-sm text-gray-900 dark:text-brand-cream focus:outline-none focus:border-brand-accent transition-colors duration-300"
+        className="bg-gray-50 dark:bg-brand-dark/50 border border-gray-300 dark:border-brand-slate/50 rounded px-2 py-1 text-sm text-gray-900 dark:text-brand-cream focus:outline-none focus:border-brand-accent transition-colors duration-300"
         aria-label="Select audience"
       >
         <option value="student">👨‍🎓 Students</option>

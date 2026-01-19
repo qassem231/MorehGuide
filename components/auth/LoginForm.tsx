@@ -70,7 +70,7 @@ export default function LoginForm() {
 
   return (
     // FIX: Container Background -> White in Light Mode, Slate in Dark Mode
-    <div className="max-w-md w-full space-y-8 bg-white dark:bg-brand-slate/50 backdrop-blur-sm p-8 rounded-2xl shadow-xl dark:shadow-brand border border-gray-200 dark:border-brand-slate/50 transition-colors duration-300">
+    <div className="max-w-md w-full space-y-8 bg-gray-50 dark:bg-brand-slate/50 backdrop-blur-sm p-8 rounded-2xl shadow-xl dark:shadow-brand border border-gray-200 dark:border-brand-slate/50 transition-colors duration-300">
       <div>
         <h2 className="mt-6 text-center text-3xl font-bold bg-gradient-brand bg-clip-text text-transparent">
           Welcome Back

@@ -165,7 +165,7 @@ export default function Sidebar({
 
   return (
     // FIX: Light mode uses gray-50 bg + dark text. Dark mode uses brand-slate bg + cream text.
-    <div className="w-64 h-full bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 text-gray-900 dark:text-gray-100 flex flex-col shadow-lg overflow-hidden transition-colors duration-300">
+    <div className="w-64 h-full bg-gray-50 border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 text-gray-900 dark:text-gray-100 flex flex-col shadow-lg overflow-hidden transition-colors duration-300">
       {/* Top Section - New Chat Button */}
       <div className="shrink-0 border-b border-gray-200 dark:border-brand-slate/30 flex flex-col gap-2 p-2 transition-colors duration-300">
         <button

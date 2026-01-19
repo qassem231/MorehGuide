@@ -14,7 +14,7 @@
 
 /* Force specific Background Colors for Light/Dark Mode */
 :root {
-  --background: #ffffff; /* Pure White for Light Mode */
+  --background: #f3f4f6; /* Soft Gray for Light Mode */
   --foreground: #0f172a;
 }
 

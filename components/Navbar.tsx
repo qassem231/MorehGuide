@@ -114,7 +114,7 @@ export default function Navbar({}: NavbarProps = {}) {
 
   return (
     // FIX: Background is white in light mode, dark gray in dark mode
-    <nav className="bg-white dark:bg-[#1e1f20] border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm z-10 shadow-md transition-colors duration-300">
+    <nav className="bg-gray-50 dark:bg-[#1e1f20] border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm z-10 shadow-md transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left Section - Sidebar Toggle + Logo */}
@@ -210,7 +210,7 @@ export default function Navbar({}: NavbarProps = {}) {
 
                   {/* Dropdown Menu */}
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white dark:bg-[#1e1f20] backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden animate-in fade-in z-50 transition-colors duration-300">
+                    <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-gray-50 dark:bg-[#1e1f20] backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden animate-in fade-in z-50 transition-colors duration-300">
                       <div className="sm:hidden px-3 py-2 border-b border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400">
                         <p className="font-semibold text-gray-900 dark:text-gray-100">
                           {user.name}

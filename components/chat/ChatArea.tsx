@@ -207,7 +207,7 @@ export default function ChatArea({
 
   return (
     // FIX: Added bg-gray-50 for light mode, dark:bg-brand-dark for dark mode
-    <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-white dark:bg-slate-950 relative w-full transition-colors duration-300">
+    <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-gray-50 dark:bg-slate-950 relative w-full transition-colors duration-300">
       {/* Scrollable Messages Area */}
       <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 pb-28 sm:pb-32 px-2 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
         {messages.map((message, index) => (
@@ -305,7 +305,7 @@ export default function ChatArea({
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
               disabled={isLoading}
-              className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-brand-slate/70 border border-gray-200 dark:border-brand-slate/50 rounded-full text-xs sm:text-sm text-gray-900 dark:text-brand-cream placeholder-gray-400 dark:placeholder-brand-light focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
+              className="w-full px-3 sm:px-4 py-2 bg-gray-50 dark:bg-brand-slate/70 border border-gray-200 dark:border-brand-slate/50 rounded-full text-xs sm:text-sm text-gray-900 dark:text-brand-cream placeholder-gray-400 dark:placeholder-brand-light focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent disabled:opacity-50 transition-all duration-200"
             />
           </div>
           <button

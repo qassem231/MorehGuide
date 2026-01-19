@@ -10,7 +10,7 @@ export default function SecurityTab({
   return (
     <div className="space-y-6">
       {/* Email Section */}
-      <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
+      <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
         <h3 className="text-2xl font-bold text-gray-900 dark:text-brand-cream mb-6">
           Email Address
         </h3>
@@ -28,7 +28,7 @@ export default function SecurityTab({
             placeholder="Enter your email address"
             value={formData.email}
             onChange={(e) => onInputChange("email", e.target.value)}
-            className="w-full bg-white dark:bg-brand-dark/50 border border-gray-300 dark:border-brand-slate/50 rounded-lg px-4 py-3 text-gray-900 dark:text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition-all"
+            className="w-full bg-gray-50 dark:bg-brand-dark/50 border border-gray-300 dark:border-brand-slate/50 rounded-lg px-4 py-3 text-gray-900 dark:text-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition-all"
           />
           <p className="text-xs text-gray-500 dark:text-brand-light/50 mt-2">
             Your email is used for account recovery and notifications
@@ -37,7 +37,7 @@ export default function SecurityTab({
       </div>
 
       {/* Password Management */}
-      <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
+      <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
         <h3 className="text-2xl font-bold text-gray-900 dark:text-brand-cream mb-6">
           Security Settings
         </h3>

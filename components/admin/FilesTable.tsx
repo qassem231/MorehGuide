@@ -43,7 +43,7 @@ export default function FilesTable({
 }: FilesTableProps) {
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
+      <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
         <div className="p-8 text-center text-gray-500 dark:text-brand-light/70">
           <div className="animate-spin inline-block w-8 h-8 border-4 border-brand-accent/30 border-t-brand-accent rounded-full"></div>
           <p className="mt-4">Loading files...</p>
@@ -54,7 +54,7 @@ export default function FilesTable({
 
   if (files.length === 0) {
     return (
-      <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
+      <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
         <div className="p-8 text-center text-gray-400 dark:text-brand-light/50">
           <FiFileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
           <p className="text-lg">No files found</p>
@@ -65,7 +65,7 @@ export default function FilesTable({
   }
 
   return (
-    <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
+    <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg overflow-hidden shadow-lg transition-colors duration-300">
       <div className="overflow-x-auto -mx-4 sm:mx-0">
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-brand-slate/50 border-b border-gray-200 dark:border-brand-slate/30 transition-colors duration-300">

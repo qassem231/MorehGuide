@@ -26,7 +26,7 @@ export default function ProfileAvatarSection({
   const roleLabel = user.role === "admin" ? "Lecturer" : "Student";
 
   return (
-    <div className="bg-white dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
+    <div className="bg-gray-50 dark:bg-brand-slate/20 backdrop-blur-lg border border-gray-200 dark:border-white/10 rounded-2xl p-8 shadow-sm dark:shadow-none transition-colors duration-300">
       <div className="flex flex-col md:flex-row gap-8 items-center">
         {/* Avatar */}
         <div className="relative group">

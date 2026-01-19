@@ -7,7 +7,7 @@ interface FileStatsCardsProps {
 export default function FileStatsCards({ totalFiles }: FileStatsCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div className="bg-white dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
+      <div className="bg-gray-50 dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500 dark:text-brand-light/70 text-sm font-semibold uppercase tracking-wide">
@@ -21,7 +21,7 @@ export default function FileStatsCards({ totalFiles }: FileStatsCardsProps) {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
+      <div className="bg-gray-50 dark:bg-brand-slate/30 backdrop-blur-sm border border-gray-200 dark:border-brand-slate/50 rounded-lg p-6 transition-colors duration-300 shadow-sm dark:shadow-none">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-500 dark:text-brand-light/70 text-sm font-semibold uppercase tracking-wide">
