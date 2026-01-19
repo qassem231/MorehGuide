@@ -128,7 +128,10 @@ export default function ChatArea({
 
       // Step 1: Create new chat if needed (skip for guests)
       let activeChatId: string | null = currentChatId;
+      let isCreatingNewChat = false;
+
       if (!activeChatId && !isGuest) {
+        isCreatingNewChat = true;
         const chatRes = await fetch("/api/chats", {
           method: "POST",
           headers: {
@@ -157,7 +160,9 @@ export default function ChatArea({
         }
       }
 
-      // Step 2: Get AI response (do NOT send message again, it's already in the chat)
+      // Step 2: Get AI response
+      // For first message: user message already saved in /api/chats, only save assistant response
+      // For subsequent messages: save both user and assistant messages
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -167,7 +172,7 @@ export default function ChatArea({
         body: JSON.stringify({
           message: userInput,
           chatId: activeChatId,
-          isFirstMessage: false,
+          isFirstMessage: isCreatingNewChat, // true only when creating new chat
         }),
       });
 
