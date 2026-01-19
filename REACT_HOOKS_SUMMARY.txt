@@ -1,0 +1,619 @@
+================================================================================
+                    REACT HOOKS SUMMARY - MorehGuide Project
+================================================================================
+
+This document lists all React hooks used throughout the MorehGuide application
+and explains what each hook does.
+
+================================================================================
+                            CORE REACT HOOKS
+================================================================================
+
+1. useState
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Creates state variables that trigger re-renders when changed. Every time 
+  state updates, React re-renders the component to reflect the new data.
+
+HOW IT WORKS:
+  const [value, setValue] = useState(initialValue);
+  
+  - value: Current state value
+  - setValue: Function to update the state
+  - initialValue: What the state starts as
+
+EXAMPLES IN THE PROJECT:
+
+  File: components/Navbar.tsx
+  ─────────────────────────
+  const [user, setUser] = useState<any>(null);
+  → Stores logged-in user data (name, email, role)
+  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  → Tracks if user dropdown menu is open/closed
+  
+  const [isGuest, setIsGuest] = useState(false);
+  → Tracks if user is browsing as guest
+
+
+  File: components/chat/ChatArea.tsx
+  ──────────────────────────────────
+  const [input, setInput] = useState('');
+  → What the user is typing in the message box
+  
+  const [isLoading, setIsLoading] = useState(false);
+  → Shows "thinking" dots while AI is responding
+  
+  const [messages, setMessages] = useState<Message[]>([]);
+  → All chat messages displayed on screen
+
+
+  File: components/chat/Sidebar.tsx
+  ─────────────────────────────────
+  const [chats, setChats] = useState<Chat[]>([]);
+  → List of all user's chats
+  
+  const [isLoading, setIsLoading] = useState(true);
+  → Shows loading spinner while fetching chats
+
+
+  File: app/settings/page.tsx
+  ──────────────────────────
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  → Which settings tab is selected (Profile/Security/Preferences)
+  
+  const [hasChanges, setHasChanges] = useState(false);
+  → Tracks if user has unsaved changes (shows save bar)
+  
+  const [formData, setFormData] = useState({ name: '', email: '' });
+  → User's name and email being edited
+  
+  const [profilePicture, setProfilePicture] = useState('');
+  → Base64 encoded profile picture
+
+
+  File: app/chat/page.tsx
+  ──────────────────────
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  → Is user logged in?
+  
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  → Which chat is currently open?
+  
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  → Number that triggers sidebar to refresh chat list
+
+
+WHEN TO USE:
+  ✓ Managing form inputs (text, email, password fields)
+  ✓ Tracking UI state (is dropdown open? is loading? is editing?)
+  ✓ Storing data from API responses (user info, chat messages)
+  ✓ Managing boolean flags (isLoggedIn, hasError, isLoading)
+
+
+================================================================================
+
+2. useEffect
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Runs code AFTER the component renders. Perfect for fetching data, setting 
+  up listeners, or triggering actions when state changes.
+
+HOW IT WORKS:
+  useEffect(() => {
+    // This code runs after component renders
+    doSomething();
+  }, [dependency1, dependency2]);
+  
+  - Empty dependency array [] = Run once when component mounts
+  - [specificValue] = Run whenever specificValue changes
+  - No dependency array = Run after EVERY render (usually bad!)
+
+
+EXAMPLES IN THE PROJECT:
+
+  File: components/Navbar.tsx
+  ─────────────────────────
+  useEffect(() => {
+    const checkUser = () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      // ... set user state ...
+    };
+    checkUser();
+  }, []);
+  → Runs ONCE when navbar loads
+  → Checks if user is logged in from localStorage
+  → Sets user data in component state
+
+
+  File: components/chat/ChatArea.tsx
+  ──────────────────────────────────
+  useEffect(() => {
+    // Auto-scroll to newest message
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
+  → Runs whenever messages or isLoading changes
+  → Scrolls chat to bottom when new messages appear
+
+
+  File: components/chat/Sidebar.tsx
+  ─────────────────────────────────
+  useEffect(() => {
+    const loadChats = async () => {
+      const res = await fetch('/api/chats', { ... });
+      const data = await res.json();
+      setChats(data.chats);
+    };
+    loadChats();
+  }, [refreshTrigger]);
+  → Runs when component mounts OR refreshTrigger changes
+  → Fetches all user's chats from database
+  → Displays them in the sidebar
+
+
+  File: app/chat/page.tsx
+  ──────────────────────
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');  // Redirect if not logged in
+    } else {
+      setIsAuthorized(true);
+    }
+  }, []);
+  → Runs ONCE when chat page loads
+  → Checks if user is authorized
+  → Redirects to login if not
+
+
+  File: app/settings/page.tsx
+  ──────────────────────────
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsed = JSON.parse(userData);
+      setUser(parsed);
+      setFormData({ name: parsed.name, email: parsed.email });
+    }
+  }, []);
+  → Runs ONCE when settings page loads
+  → Loads user data from localStorage
+  → Pre-fills form fields with current data
+
+
+  File: lib/ThemeContext.tsx
+  ──────────────────────────
+  useEffect(() => {
+    setMounted(true);
+    const savedTheme = localStorage.getItem('theme');
+    applyTheme(savedTheme || 'light');
+  }, []);
+  → Runs ONCE when app loads
+  → Loads saved theme preference from localStorage
+  → Applies light/dark mode to entire app
+
+
+WHEN TO USE:
+  ✓ Fetching data from API when component loads
+  ✓ Running code when specific state values change
+  ✓ Setting up event listeners
+  ✓ Auto-scrolling or animations
+  ✓ Authorization checks when page loads
+  ✓ Cleanup tasks (removing listeners, canceling requests)
+
+
+================================================================================
+
+3. useRef
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Creates a reference to a DOM element that persists across re-renders but 
+  does NOT trigger re-renders when changed. Used for direct DOM access.
+
+HOW IT WORKS:
+  const refVariable = useRef(initialValue);
+  
+  - Can access DOM element: refVariable.current
+  - Changing it doesn't cause re-render (unlike useState)
+  - Perfect for focusing inputs, measuring elements, animations
+
+
+EXAMPLES IN THE PROJECT:
+
+  File: components/Navbar.tsx
+  ─────────────────────────
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  → Reference to the dropdown menu element
+  → Used to detect clicks outside dropdown to close it
+
+
+  File: components/chat/ChatArea.tsx
+  ──────────────────────────────────
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  → Reference to empty div at bottom of messages
+  → Used to auto-scroll to newest message:
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+
+  File: app/settings/page.tsx
+  ──────────────────────────
+  const [pictureInputKey, setPictureInputKey] = useState(0);
+  → Forces file input to reset by changing key attribute
+  → Used to clear selected file after upload
+
+
+WHEN TO USE:
+  ✓ Accessing DOM elements directly
+  ✓ Auto-scrolling to elements
+  ✓ Focusing input fields
+  ✓ Measuring element size/position
+  ✓ Playing/pausing media
+  ✓ Storing timers/intervals
+  ✗ DO NOT use for values that should trigger re-renders
+
+
+================================================================================
+
+4. useRouter
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Next.js hook for navigating between pages programmatically. Used to 
+  redirect users or navigate without clicking a link.
+
+HOW IT WORKS:
+  const router = useRouter();
+  router.push('/path');        // Go to page
+  router.replace('/path');     // Go to page, replace history
+  router.refresh();            // Refresh current page
+  router.back();               // Go back
+
+
+EXAMPLES IN THE PROJECT:
+
+  File: components/Navbar.tsx
+  ─────────────────────────
+  const router = useRouter();
+  → Used to navigate when user clicks logout button
+  → Redirects to login page after logout
+
+
+  File: app/chat/page.tsx
+  ──────────────────────
+  const router = useRouter();
+  if (!token) {
+    router.push('/login');  // Redirect to login if not authorized
+  }
+  → Protects page from unauthorized access
+  → Redirects non-logged-in users to login
+
+
+  File: app/settings/page.tsx
+  ──────────────────────────
+  const router = useRouter();
+  → Used after saving settings to refresh page
+  → Ensures user sees updated profile picture
+
+
+  File: auth components (LoginForm.tsx, RegisterForm.tsx)
+  ───────────────────────────────────────────────────────
+  router.push('/chat');  // After login, go to chat
+  → Redirects new users to chat page after registration
+
+
+WHEN TO USE:
+  ✓ Redirecting after login/logout
+  ✓ Protecting pages from unauthorized access
+  ✓ Navigation after form submission
+  ✓ Redirecting based on user role (admin vs student)
+  ✓ Conditional page access
+
+
+================================================================================
+
+5. useContext
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Accesses values from a React Context (global state without prop drilling).
+  Allows sharing data across components without passing props through every 
+  level.
+
+HOW IT WORKS:
+  const contextValue = useContext(MyContext);
+  
+  Requires a Context provider wrapper around components:
+  <MyContextProvider>
+    <ComponentsThatUseContext />
+  </MyContextProvider>
+
+
+EXAMPLES IN THE PROJECT:
+
+  File: lib/ThemeContext.tsx
+  ──────────────────────────
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  → Access current theme (light/dark)
+  → Call toggleTheme() to switch between light and dark mode
+  → Used in Navbar to switch theme globally
+
+
+  File: lib/MobileSidebarContext.tsx
+  ──────────────────────────────────
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useContext(MobileSidebarContext);
+  → Track if sidebar is open on mobile
+  → Toggle sidebar visibility without drilling props
+
+
+  File: components/Navbar.tsx
+  ─────────────────────────
+  const { theme, toggleTheme } = useTheme();
+  → Custom hook wrapper around useContext
+  → Gets current theme and toggle function
+  → Shows sun icon (light mode) or moon icon (dark mode)
+
+
+  File: app/chat/page.tsx
+  ──────────────────────
+  const { isMobileSidebarOpen, toggleMobileSidebar } = useMobileSidebar();
+  → Access mobile sidebar state
+  → Toggle sidebar for mobile users
+
+
+WHEN TO USE:
+  ✓ Theme switching (light/dark mode)
+  ✓ Language/localization settings
+  ✓ Mobile sidebar state
+  ✓ User authentication state (across app)
+  ✓ Avoiding "prop drilling" (passing props through many levels)
+
+
+================================================================================
+
+                          CUSTOM HOOK PATTERNS
+================================================================================
+
+1. useTheme (in lib/ThemeContext.tsx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Custom wrapper around useContext(ThemeContext). Provides theme and toggle 
+  function to any component.
+
+WHAT IT RETURNS:
+  {
+    theme: 'light' | 'dark',
+    toggleTheme: () => void,
+    mounted: boolean
+  }
+
+USAGE:
+  const { theme, toggleTheme } = useTheme();
+  
+  // Use current theme
+  className={theme === 'dark' ? 'bg-black' : 'bg-white'}
+  
+  // Toggle when button clicked
+  onClick={() => toggleTheme()}
+
+FILES USING IT:
+  ✓ components/Navbar.tsx
+  ✓ app/layout.tsx
+
+
+2. useMobileSidebar (in lib/MobileSidebarContext.tsx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT IT DOES:
+  Custom hook for managing mobile sidebar visibility state globally.
+
+WHAT IT RETURNS:
+  {
+    isMobileSidebarOpen: boolean,
+    setIsMobileSidebarOpen: (open: boolean) => void,
+    toggleMobileSidebar: () => void
+  }
+
+USAGE:
+  const { isMobileSidebarOpen, toggleMobileSidebar } = useMobileSidebar();
+  
+  // Check if sidebar is open
+  {isMobileSidebarOpen && <Sidebar />}
+  
+  // Toggle on button click
+  onClick={() => toggleMobileSidebar()}
+
+FILES USING IT:
+  ✓ components/Navbar.tsx
+  ✓ app/chat/page.tsx
+
+
+================================================================================
+
+                            HOOK USAGE SUMMARY TABLE
+================================================================================
+
+HOOK             | PURPOSE                           | USAGE COUNT
+─────────────────┼───────────────────────────────────┼────────────
+useState          | Manage component state            | 40+
+useEffect         | Run side effects                  | 15+
+useRef            | DOM element references           | 3
+useRouter         | Navigate between pages           | 10+
+useContext        | Access context values            | 5+
+useTheme (custom) | Get/toggle theme                 | 3
+useMobileSidebar  | Manage mobile sidebar state      | 3
+
+
+================================================================================
+
+                        KEY PATTERNS & BEST PRACTICES
+================================================================================
+
+PATTERN 1: Loading State Management
+─────────────────────────────────────
+const [isLoading, setIsLoading] = useState(false);
+const [data, setData] = useState(null);
+const [error, setError] = useState('');
+
+useEffect(() => {
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/data');
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
+Used in: ChatArea, Sidebar, Settings page
+
+
+PATTERN 2: Form State Management
+──────────────────────────────────
+const [formData, setFormData] = useState({ name: '', email: '' });
+const [hasChanges, setHasChanges] = useState(false);
+
+const handleInputChange = (field, value) => {
+  setFormData(prev => ({ ...prev, [field]: value }));
+  setHasChanges(true);
+};
+
+const handleSave = async () => {
+  // Send to API
+  setHasChanges(false);
+};
+
+Used in: Settings page, Login/Register forms
+
+
+PATTERN 3: Authorization Check
+─────────────────────────────────
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    router.push('/login');
+  } else {
+    setIsAuthorized(true);
+  }
+}, []);
+
+Used in: Chat page, Settings page, Admin pages
+
+
+PATTERN 4: Auto-scroll to Bottom
+──────────────────────────────────
+const messagesEndRef = useRef(null);
+
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+}, [messages]);
+
+// In JSX:
+{messages.map(msg => <div key={msg.id}>{msg.content}</div>)}
+<div ref={messagesEndRef} />
+
+Used in: ChatArea component
+
+
+PATTERN 5: Cleanup on Unmount
+───────────────────────────────
+useEffect(() => {
+  window.addEventListener('click', handleClick);
+  
+  // Cleanup function
+  return () => {
+    window.removeEventListener('click', handleClick);
+  };
+}, []);
+
+Used in: Navbar (detecting outside clicks)
+
+
+================================================================================
+
+                            HOOK DEPENDENCY RULES
+================================================================================
+
+Empty Dependency Array []
+├─ Meaning: Run once when component mounts
+├─ Used for:
+│  ├─ Initial data fetching
+│  ├─ Authorization checks
+│  ├─ Setting up listeners
+│  └─ One-time initialization
+└─ Examples: ChatArea loading messages, Sidebar loading chats
+
+Dependency Array [value]
+├─ Meaning: Run when 'value' changes
+├─ Used for:
+│  ├─ Reacting to prop changes
+│  ├─ Loading different data
+│  └─ Resetting state
+└─ Examples: Loading messages when chatId changes
+
+No Dependency Array (BAD!)
+├─ Meaning: Run after EVERY render
+├─ Usually unwanted (infinite loops, performance issues)
+└─ Avoid unless you have a specific reason!
+
+
+================================================================================
+
+                              TIPS & WARNINGS
+================================================================================
+
+⚠️  WARNING: Never call hooks conditionally
+    ❌ if (condition) { const [state, setState] = useState(0); }
+    ✅ const [state, setState] = useState(0); if (condition) { /* use state */ }
+
+⚠️  WARNING: useEffect cleanup
+    Remember to remove event listeners and cancel API requests in cleanup:
+    return () => { /* cleanup code */ };
+
+⚠️  WARNING: useState callback pattern
+    setData() is asynchronous, the state updates after the function returns:
+    setCount(1); console.log(count); // Still shows old value!
+    
+    Use useEffect to react to state changes:
+    useEffect(() => { /* runs when state changes */ }, [count]);
+
+✅  TIP: Use useCallback and useMemo for performance
+    If passing functions to child components, wrap in useCallback to prevent
+    unnecessary re-renders of children.
+
+✅  TIP: Use TypeScript with hooks
+    const [data, setData] = useState<DataType>({});
+    Provides better IDE support and catches errors early.
+
+✅  TIP: Custom hooks for reusable logic
+    Extract common hook patterns into custom hooks (like useTheme, useMobileSidebar)
+    Makes code cleaner and more reusable.
+
+
+================================================================================
+
+                            CONCLUSION
+================================================================================
+
+The MorehGuide project uses React hooks effectively to manage:
+
+1. Component state (useState)
+2. Side effects and data fetching (useEffect)
+3. DOM references (useRef)
+4. Page navigation (useRouter)
+5. Global state sharing (useContext + custom hooks)
+
+Understanding these hooks is essential for modifying any component in the
+application.
+
+================================================================================

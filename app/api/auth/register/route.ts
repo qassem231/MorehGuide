@@ -1,35 +1,35 @@
-'use server';
+"use server";
 
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import User from '@/backend/models/User';
-import { hashPassword, signToken } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/db";
+import User from "@/backend/models/User";
+import { hashPassword } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
-  console.log('📝 [REGISTER API]: Received registration request');
+  console.log("📝 [REGISTER API]: Received registration request");
 
   try {
     const { name, email, password } = await request.json();
 
     // Validation
     if (!name || !email || !password) {
-      console.warn('⚠️ [REGISTER API]: Missing required fields');
+      console.warn("⚠️ [REGISTER API]: Missing required fields");
       return NextResponse.json(
-        { error: 'Name, email, and password are required' },
-        { status: 400 }
+        { error: "Name, email, and password are required" },
+        { status: 400 },
       );
     }
 
     if (password.length < 6) {
-      console.warn('⚠️ [REGISTER API]: Password too short');
+      console.warn("⚠️ [REGISTER API]: Password too short");
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
+        { error: "Password must be at least 6 characters" },
+        { status: 400 },
       );
     }
 
     // Connect to MongoDB
-    console.log('🗄️ [REGISTER API]: Connecting to MongoDB');
+    console.log("🗄️ [REGISTER API]: Connecting to MongoDB");
     await connectToDatabase();
 
     // Check if email already exists
@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       console.warn(`⚠️ [REGISTER API]: Email ${email} already registered`);
       return NextResponse.json(
-        { error: 'Email is already registered' },
-        { status: 409 }
+        { error: "Email is already registered" },
+        { status: 409 },
       );
     }
 
     // Hash password
-    console.log('🔐 [REGISTER API]: Hashing password');
+    console.log("🔐 [REGISTER API]: Hashing password");
     const hashedPassword = await hashPassword(password);
 
     // Create new user
@@ -54,39 +54,38 @@ export async function POST(request: NextRequest) {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: 'user',
+      role: "user",
       isAdmin: false,
     });
 
-    console.log(`✅ [REGISTER API]: User created successfully with ID: ${newUser._id}`);
+    console.log(
+      `✅ [REGISTER API]: User created successfully with ID: ${newUser._id}`,
+    );
 
     // Return success response WITHOUT token - user must login separately
     return NextResponse.json(
       {
         success: true,
-        message: 'User registered successfully. Please log in to continue.',
+        message: "User registered successfully. Please log in to continue.",
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error('❌ [REGISTER API]: Registration error:', error);
+    console.error("❌ [REGISTER API]: Registration error:", error);
 
     if (error instanceof Error) {
-      if (error.message.includes('duplicate key')) {
+      if (error.message.includes("duplicate key")) {
         return NextResponse.json(
-          { error: 'Email is already registered' },
-          { status: 409 }
+          { error: "Email is already registered" },
+          { status: 409 },
         );
       }
       return NextResponse.json(
         { error: `Registration failed: ${error.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    return NextResponse.json(
-      { error: 'Registration failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }

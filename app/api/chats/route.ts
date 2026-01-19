@@ -1,10 +1,10 @@
-'use server';
+"use server";
 
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
-import Chat from '@/backend/models/Chat';
-import { randomUUID } from 'crypto';
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/db";
+import { verifyToken } from "@/lib/auth";
+import Chat from "@/backend/models/Chat";
+import { randomUUID } from "crypto";
 
 /**
  * Extract JWT token from:
@@ -12,13 +12,13 @@ import { randomUUID } from 'crypto';
  * 2) Cookie named "token"
  */
 function extractToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
     return authHeader.slice(7).trim();
   }
 
-  const cookieToken = request.cookies.get('token')?.value;
-  if (cookieToken && cookieToken.trim() !== '') {
+  const cookieToken = request.cookies.get("token")?.value;
+  if (cookieToken && cookieToken.trim() !== "") {
     return cookieToken.trim();
   }
 
@@ -37,12 +37,14 @@ async function getUserFromRequest(request: NextRequest) {
  * Guests cannot have persistent chats, so returns empty list.
  */
 export async function GET(request: NextRequest) {
-  console.log('📥 [CHATS API]: Received Get All Chats Request (GET)');
+  console.log("📥 [CHATS API]: Received Get All Chats Request (GET)");
 
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
-      console.log('⚠️ [CHATS API]: Guest user requesting chats - returning empty list');
+      console.log(
+        "⚠️ [CHATS API]: Guest user requesting chats - returning empty list",
+      );
       return NextResponse.json({ chats: [] });
     }
 
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
     // Fetch all chats for this user, sorted by most recent first
     const chats = await Chat.find(
       { userId: user.userId },
-      { _id: 1, chatId: 1, title: 1, createdAt: 1 }
+      { _id: 1, chatId: 1, title: 1, createdAt: 1 },
     )
       .sort({ createdAt: -1 })
       .lean();
@@ -64,8 +66,11 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('❌ [CHATS API]: GET error:', error);
-    return NextResponse.json({ error: 'Failed to load chats' }, { status: 500 });
+    console.error("❌ [CHATS API]: GET error:", error);
+    return NextResponse.json(
+      { error: "Failed to load chats" },
+      { status: 500 },
+    );
   }
 }
 
@@ -78,36 +83,39 @@ export async function GET(request: NextRequest) {
  * Note: Guests cannot create persistent chats, so returns empty response
  */
 export async function POST(request: NextRequest) {
-  console.log('📨 [CHATS API]: Received Create/Update Chat Request (POST)');
+  console.log("📨 [CHATS API]: Received Create/Update Chat Request (POST)");
 
   try {
     const user = await getUserFromRequest(request);
     if (!user) {
-      console.log('👥 [CHATS API]: Guest user - skipping chat creation');
+      console.log("👥 [CHATS API]: Guest user - skipping chat creation");
       // Guests can't create chats, return empty chatId
-      return NextResponse.json({ chatId: '', isNewChat: false });
+      return NextResponse.json({ chatId: "", isNewChat: false });
     }
 
-    const { chatId: providedChatId, message, isFirstMessage } = await request.json();
+    const { chatId: providedChatId, message } = await request.json();
 
     if (!message) {
-      return NextResponse.json({ error: 'No message provided' }, { status: 400 });
+      return NextResponse.json(
+        { error: "No message provided" },
+        { status: 400 },
+      );
     }
 
     await connectToDatabase();
 
     let chatId = providedChatId;
-    let isNewChat = false;
 
     // If no chatId provided, create a new chat
     if (!chatId) {
       chatId = randomUUID();
-      isNewChat = true;
 
       // Generate title from first message (truncate to 50 chars)
       const title = message.substring(0, 50).trim();
 
-      console.log(`📝 [CHATS API]: Creating new chat ${chatId} with title: "${title}"`);
+      console.log(
+        `📝 [CHATS API]: Creating new chat ${chatId} with title: "${title}"`,
+      );
 
       const newChat = await Chat.create({
         chatId,
@@ -115,7 +123,7 @@ export async function POST(request: NextRequest) {
         title,
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: message,
             createdAt: new Date(),
           },
@@ -136,7 +144,7 @@ export async function POST(request: NextRequest) {
     console.log(`💬 [CHATS API]: Adding message to chat ${chatId}`);
 
     const userMsg = {
-      role: 'user' as const,
+      role: "user" as const,
       content: message,
       createdAt: new Date(),
     };
@@ -148,11 +156,11 @@ export async function POST(request: NextRequest) {
           messages: userMsg,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedChat) {
-      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -164,7 +172,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('❌ [CHATS API]: POST error:', error);
-    return NextResponse.json({ error: 'Failed to process chat' }, { status: 500 });
+    console.error("❌ [CHATS API]: POST error:", error);
+    return NextResponse.json(
+      { error: "Failed to process chat" },
+      { status: 500 },
+    );
   }
 }

@@ -1,13 +1,33 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+/**
+ * CHAT AREA COMPONENT
+ *
+ * This is the main chat interface where users ask questions and see AI responses.
+ *
+ * What it does:
+ * - Displays all messages in the current chat (user messages + AI responses)
+ * - Handles sending new messages to the AI
+ * - Shows "thinking" animation while waiting for AI response
+ * - Auto-scrolls to newest message
+ *
+ * Props:
+ * - currentChatId: Which chat is currently open (null = new chat)
+ * - messages: Array of all messages to display
+ * - setMessages: Function to update messages
+ * - onNewChatCreated: Callback when user sends first message (creates new chat)
+ * - isGuest: If true, user is in guest mode (no chat saving)
+ */
 
+import { useState, useRef, useEffect } from "react";
+import { FiSend, FiUser, FiMessageSquare } from "react-icons/fi";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+// Type definition for chat messages
 interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+  role: "user" | "assistant"; // "user" = question, "assistant" = AI answer
+  content: string; // The actual message text
 }
 
 interface ChatAreaProps {
@@ -19,28 +39,42 @@ interface ChatAreaProps {
   isGuest?: boolean;
 }
 
-export default function ChatArea({ currentChatId, messages, setMessages, onChatIdChange, onNewChatCreated, isGuest = false }: ChatAreaProps) {
-  console.log('ChatArea component rendered with currentChatId:', currentChatId, 'messages count:', messages.length, 'isGuest:', isGuest);
-  const [input, setInput] = useState('');
+export default function ChatArea({
+  currentChatId,
+  messages,
+  setMessages,
+  onChatIdChange,
+  onNewChatCreated,
+  isGuest = false,
+}: ChatAreaProps) {
+  console.log(
+    "ChatArea component rendered with currentChatId:",
+    currentChatId,
+    "messages count:",
+    messages.length,
+    "isGuest:",
+    isGuest,
+  );
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load chat history when currentChatId changes
   useEffect(() => {
-    console.log('ChatArea useEffect triggered, currentChatId:', currentChatId);
+    console.log("ChatArea useEffect triggered, currentChatId:", currentChatId);
     if (!currentChatId) {
-      console.log('currentChatId is null, messages already cleared by parent');
+      console.log("currentChatId is null, messages already cleared by parent");
       return;
     }
 
     const loadChatHistory = async () => {
       try {
-        console.log('Loading chat history for:', currentChatId);
-        const token = localStorage.getItem('token');
+        console.log("Loading chat history for:", currentChatId);
+        const token = localStorage.getItem("token");
         if (!token) return;
 
         const res = await fetch(`/api/chat?chatId=${currentChatId}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -51,20 +85,20 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         const data: { messages?: Message[] } = await res.json();
 
         if (Array.isArray(data.messages) && data.messages.length > 0) {
-          console.log('Loaded', data.messages.length, 'messages');
+          console.log("Loaded", data.messages.length, "messages");
           setMessages(data.messages);
         } else {
-          console.log('No messages found, showing initial greeting');
+          console.log("No messages found, showing initial greeting");
           setMessages([
             {
-              role: 'assistant',
+              role: "assistant",
               content:
-                'שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.',
+                "שלום! אני עוזר ה-AI של המכללה האקדמית בראודה. אני יכול לסייע במידע על נהלים ותקנות במכללה, בהתבסס על נתונים מאתר המכללה.",
             },
           ]);
         }
       } catch (e) {
-        console.error('Failed to load chat history:', e);
+        console.error("Failed to load chat history:", e);
       }
     };
 
@@ -72,7 +106,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   }, [currentChatId, setMessages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -82,24 +116,24 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = { role: "user", content: input };
     const userInput = input;
-    
+
     setMessages((prev: Message[]) => [...prev, userMessage]);
-    setInput('');
+    setInput("");
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
 
       // Step 1: Create new chat if needed (skip for guests)
       let activeChatId: string | null = currentChatId;
       if (!activeChatId && !isGuest) {
-        const chatRes = await fetch('/api/chats', {
-          method: 'POST',
+        const chatRes = await fetch("/api/chats", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: token ? `Bearer ${token}` : '',
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
           },
           body: JSON.stringify({
             message: userInput,
@@ -108,7 +142,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         });
 
         if (!chatRes.ok) {
-          throw new Error('Failed to create chat');
+          throw new Error("Failed to create chat");
         }
 
         const chatData = await chatRes.json();
@@ -123,31 +157,35 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         }
       }
 
-      // Step 2: Get AI response
-      const response = await fetch('/api/chat', {
-        method: 'POST',
+      // Step 2: Get AI response (do NOT send message again, it's already in the chat)
+      const response = await fetch("/api/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: userInput,
           chatId: activeChatId,
+          isFirstMessage: false,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        throw new Error("Failed to get response");
       }
 
       const data = await response.json();
-      const assistantMessage: Message = { role: 'assistant', content: data.response };
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.response,
+      };
       setMessages((prev: Message[]) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error("Chat error:", error);
       const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again.",
       };
       setMessages((prev: Message[]) => [...prev, errorMessage]);
     } finally {
@@ -156,7 +194,7 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -165,10 +203,11 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
   return (
     // FIX: Added bg-gray-50 for light mode, dark:bg-brand-dark for dark mode
     <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-white dark:bg-slate-950 relative w-full transition-colors duration-300">
-      
       {/* Top Bar with Header */}
       <div className="shrink-0 h-16 border-b border-gray-200 dark:border-brand-slate/30 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-sm flex items-center px-3 sm:px-6 transition-colors duration-300">
-        <span className="text-xl sm:text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">MorehGuide</span>
+        <span className="text-xl sm:text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">
+          MorehGuide
+        </span>
       </div>
 
       {/* Scrollable Messages Area */}
@@ -176,19 +215,19 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex items-start space-x-1 sm:space-x-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} px-0.5 sm:px-0`}
+            className={`flex items-start space-x-1 sm:space-x-3 ${message.role === "user" ? "justify-end" : "justify-start"} px-0.5 sm:px-0`}
           >
-            {message.role === 'assistant' && (
+            {message.role === "assistant" && (
               <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-gradient-brand rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                 <FiMessageSquare className="w-3 sm:w-4 h-3 sm:h-4 text-white" />
               </div>
             )}
             <div
               className={`max-w-[85vw] sm:max-w-sm md:max-w-md lg:max-w-lg px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg ${
-                message.role === 'user'
-                  ? 'bg-gradient-brand text-white rounded-br-none shadow-brand text-sm sm:text-base'
-                  // FIX: Light mode uses white bg + gray text. Dark mode uses slate bg + cream text.
-                  : 'bg-white text-gray-800 border border-gray-200 dark:bg-brand-slate/70 dark:text-brand-cream dark:border-brand-slate/50 backdrop-blur-sm rounded-bl-none text-sm sm:text-base'
+                message.role === "user"
+                  ? "bg-gradient-brand text-white rounded-br-none shadow-brand text-sm sm:text-base"
+                  : // FIX: Light mode uses white bg + gray text. Dark mode uses slate bg + cream text.
+                    "bg-white text-gray-800 border border-gray-200 dark:bg-brand-slate/70 dark:text-brand-cream dark:border-brand-slate/50 backdrop-blur-sm rounded-bl-none text-sm sm:text-base"
               }`}
               dir="auto"
             >
@@ -196,20 +235,44 @@ export default function ChatArea({ currentChatId, messages, setMessages, onChatI
                 remarkPlugins={[remarkGfm]}
                 components={{
                   // FIX: Added dark: prefixes to text colors so headers are visible in both modes
-                  h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-md font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-sm font-bold mb-2 text-gray-900 dark:text-brand-cream">{children}</h3>,
-                  ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
-                  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                  h1: ({ children }) => (
+                    <h1 className="text-lg font-bold mb-2 text-gray-900 dark:text-brand-cream">
+                      {children}
+                    </h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="text-md font-bold mb-2 text-gray-900 dark:text-brand-cream">
+                      {children}
+                    </h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-sm font-bold mb-2 text-gray-900 dark:text-brand-cream">
+                      {children}
+                    </h3>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="list-disc list-inside mb-2 space-y-1">
+                      {children}
+                    </ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="list-decimal list-inside mb-2 space-y-1">
+                      {children}
+                    </ol>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-bold">{children}</strong>
+                  ),
                   em: ({ children }) => <em className="italic">{children}</em>,
-                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                  p: ({ children }) => (
+                    <p className="mb-2 last:mb-0">{children}</p>
+                  ),
                 }}
               >
                 {message.content}
               </ReactMarkdown>
             </div>
-            {message.role === 'user' && (
+            {message.role === "user" && (
               <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 bg-gray-200 dark:bg-brand-slate rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                 <FiUser className="w-3 sm:w-4 h-3 sm:h-4 text-brand-accent" />
               </div>
