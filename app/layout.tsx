@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         // FIX: Default is Light (gray-50/gray-900), Dark is Brand (brand-dark/brand-cream)
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900 dark:bg-brand-dark dark:text-brand-cream h-screen flex flex-col transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 text-gray-900 dark:bg-brand-dark dark:text-brand-cream h-screen flex flex-col transition-colors duration-300`}
       >
         <ThemeProvider>
           <MobileSidebarProvider>
