@@ -69,12 +69,13 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="max-w-md w-full space-y-8 bg-brand-slate/50 backdrop-blur-sm p-8 rounded-2xl shadow-brand border border-brand-slate/50">
+    // FIX: Container Background -> White in Light Mode, Slate in Dark Mode
+    <div className="max-w-md w-full space-y-8 bg-white dark:bg-brand-slate/50 backdrop-blur-sm p-8 rounded-2xl shadow-xl dark:shadow-brand border border-gray-200 dark:border-brand-slate/50 transition-colors duration-300">
       <div>
         <h2 className="mt-6 text-center text-3xl font-bold bg-gradient-brand bg-clip-text text-transparent">
           Welcome Back
         </h2>
-        <p className="mt-2 text-center text-sm text-brand-light">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-brand-light">
           Sign in to your MorehGuide account
         </p>
       </div>
@@ -106,7 +107,7 @@ export default function LoginForm() {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 text-red-400 text-sm text-center p-3 rounded-lg border border-red-500/30 font-medium">
+          <div className="bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 text-sm text-center p-3 rounded-lg border font-medium">
             {error}
           </div>
         )}
@@ -120,31 +121,34 @@ export default function LoginForm() {
           Sign in
         </BaseButton>
 
+        {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-brand-slate/30"></div>
+            <div className="w-full border-t border-gray-300 dark:border-brand-slate/30"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-brand-slate/50 text-brand-light/60">
+            {/* The background here MUST match the container background to hide the line */}
+            <span className="px-2 bg-white dark:bg-brand-slate/50 text-gray-500 dark:text-brand-light/60 transition-colors duration-300">
               Or
             </span>
           </div>
         </div>
 
+        {/* Guest Button - Light Mode: Gray, Dark Mode: Slate */}
         <button
           type="button"
           onClick={handleContinueAsGuest}
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-brand-slate/50 hover:bg-brand-slate/70 text-brand-cream font-semibold rounded-lg transition-all duration-200 border border-brand-slate/50 hover:border-brand-slate/70 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200 dark:bg-brand-slate/50 dark:hover:bg-brand-slate/70 dark:text-brand-cream dark:border-brand-slate/50 font-semibold rounded-lg transition-all duration-200 border hover:border-gray-300 dark:hover:border-brand-slate/70 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue as Guest
         </button>
       </form>
-      <p className="text-center text-sm text-brand-light">
+      <p className="text-center text-sm text-gray-600 dark:text-brand-light">
         Don't have an account?{" "}
         <a
           href="/register"
-          className="text-brand-accent hover:text-blue-400 font-semibold transition-colors"
+          className="text-brand-accent hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors"
         >
           Register now
         </a>

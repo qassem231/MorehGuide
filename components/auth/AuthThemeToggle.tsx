@@ -9,19 +9,13 @@ export default function AuthThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm backdrop-blur transition-colors duration-200 hover:border-gray-300 hover:bg-white dark:border-gray-700 dark:bg-gray-800/90 dark:text-gray-100 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+      className="absolute right-6 top-6 p-3 rounded-full bg-white dark:bg-brand-slate/30 text-gray-800 dark:text-brand-cream shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 border border-gray-200 dark:border-white/10 backdrop-blur-md z-50"
       aria-label="Toggle theme"
     >
       {theme === "light" ? (
-        <>
-          <FiMoon className="h-4 w-4" />
-          <span className="hidden sm:inline">Dark mode</span>
-        </>
+        <FiMoon size={24} className="text-brand-accent" />
       ) : (
-        <>
-          <FiSun className="h-4 w-4" />
-          <span className="hidden sm:inline">Light mode</span>
-        </>
+        <FiSun size={24} className="text-yellow-400" />
       )}
     </button>
   );
