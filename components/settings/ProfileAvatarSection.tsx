@@ -1,3 +1,5 @@
+"use client";
+
 import { FiCamera, FiX } from "react-icons/fi";
 import Link from "next/link";
 

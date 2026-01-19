@@ -166,13 +166,8 @@ export default function Sidebar({
   return (
     // FIX: Light mode uses gray-50 bg + dark text. Dark mode uses brand-slate bg + cream text.
     <div className="w-64 h-full bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 text-gray-900 dark:text-gray-100 flex flex-col shadow-lg overflow-hidden transition-colors duration-300">
-      {/* Top Section - Logo & New Chat Button */}
+      {/* Top Section - New Chat Button */}
       <div className="shrink-0 border-b border-gray-200 dark:border-brand-slate/30 flex flex-col gap-2 p-2 transition-colors duration-300">
-        <div className="text-center">
-          <p className="text-sm font-bold bg-gradient-brand bg-clip-text text-transparent">
-            MorehGuide
-          </p>
-        </div>
         <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-brand hover:shadow-brand text-white rounded-lg transition-all duration-200 font-semibold shadow-md"

@@ -1,3 +1,5 @@
+"use client";
+
 import { FiCheck, FiX } from "react-icons/fi";
 
 interface AudienceEditorProps {

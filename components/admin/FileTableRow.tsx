@@ -1,3 +1,5 @@
+"use client";
+
 import { FiFileText, FiTrash2, FiEdit2 } from "react-icons/fi";
 import AudienceBadge from "./AudienceBadge";
 import AudienceEditor from "./AudienceEditor";

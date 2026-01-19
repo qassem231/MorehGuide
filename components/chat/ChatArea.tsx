@@ -208,13 +208,6 @@ export default function ChatArea({
   return (
     // FIX: Added bg-gray-50 for light mode, dark:bg-brand-dark for dark mode
     <div className="flex-1 flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-white dark:bg-slate-950 relative w-full transition-colors duration-300">
-      {/* Top Bar with Header */}
-      <div className="shrink-0 h-16 border-b border-gray-200 dark:border-brand-slate/30 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-sm flex items-center px-3 sm:px-6 transition-colors duration-300">
-        <span className="text-xl sm:text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">
-          MorehGuide
-        </span>
-      </div>
-
       {/* Scrollable Messages Area */}
       <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 pb-28 sm:pb-32 px-2 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
         {messages.map((message, index) => (
