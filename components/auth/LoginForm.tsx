@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+import BaseButton from '@/components/ui/BaseButton';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -105,14 +105,14 @@ export default function LoginForm() {
           <div className="bg-red-500/10 text-red-400 text-sm text-center p-3 rounded-lg border border-red-500/30 font-medium">{error}</div>
         )}
 
-        <Button
+        <BaseButton
           type="submit"
           variant="primary"
           isLoading={isLoading}
           className="w-full py-3 text-base"
         >
           Sign in
-        </Button>
+        </BaseButton>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

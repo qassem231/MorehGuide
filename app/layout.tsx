@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NavbarWrapper from "@/components/NavbarWrapper";
+import Navbar from "@/components/Navbar";
 import { MobileSidebarProvider } from "@/lib/MobileSidebarContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
 
@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <MobileSidebarProvider>
-            <NavbarWrapper />
+            <Navbar />
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
               {children}
             </div>
